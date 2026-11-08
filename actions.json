@@ -1,0 +1,7 @@
+[
+  {"type":"click","selector":".tf-examples button[data-example=\"построить график по данным\"]"},
+  {"type":"assert","selector":"#tf-input","property":"value","equals":"Построить график по данным"},
+  {"type":"click","selector":"#tf-go"},
+  {"type":"assert","selector":"#tf-reason","property":"text","equals":"По задаче «Построить график по данным» больше всего подойдут:"},
+  {"type":"assert","selector":"#tf-list .tf-item","property":"text","equals":"MatplotlibБиблиотека для визуализации данных двумерной и трёхмерной графикой. Создаёт разные типы графиков и диаграмм и позволяет комбинировать их.🔗 Документация"}
+]
