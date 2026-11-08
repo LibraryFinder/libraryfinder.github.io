@@ -278,6 +278,7 @@ header.top {
       if (v) el.textContent = v;
     });
     syncTheme();
+    root.setAttribute("lang", CUR_LANG);
     langLabel.textContent = "\u{1F4AC} " + (CUR_LANG === "en" ? "English" : "Русский");
   }
 

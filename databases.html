@@ -463,6 +463,13 @@ try { localStorage.setItem("theme", next); } catch (e) {}
   var langLabel = document.getElementById("lang-label");
   if (langBtn && langMenu) {
     var LANGS = [{ code: "ru", label: "Русский" }, { code: "en", label: "English" }];
+    function syncLangUI() {
+      document.documentElement.setAttribute("lang", CUR_LANG);
+      var cur = null;
+      for (var i = 0; i < LANGS.length; i++) if (LANGS[i].code === CUR_LANG) { cur = LANGS[i]; break; }
+      if (cur && langLabel) langLabel.textContent = "\u{1F4AC} " + cur.label;
+    }
+    syncLangUI();
     langMenu.innerHTML = LANGS.map(function (l) {
       return '<button type="button" data-lang="' + l.code + '">' + l.label + '</button>';
     }).join("");
@@ -473,10 +480,7 @@ try { localStorage.setItem("theme", next); } catch (e) {}
       var lang = b.getAttribute("data-lang");
       if (lang !== "en") lang = "ru";
       CUR_LANG = lang;
-      document.documentElement.setAttribute("lang", lang);
-      var found = null;
-      for (var i = 0; i < LANGS.length; i++) if (LANGS[i].code === lang) { found = LANGS[i]; break; }
-      if (found) langLabel.textContent = "\u{1F4AC} " + found.label;
+      syncLangUI();
       try { localStorage.setItem("lang", lang); } catch (err) {}
       langMenu.classList.remove("open");
       renderAll();
