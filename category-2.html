@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Визуализация данных — LibraryFinder</title>
+<meta name="description" content="Библиотеки Python для визуализации: Matplotlib, Seaborn, Plotly.">
+<style>
+  :root {
+    --bg: #0f141c;
+    --surface: #1a2230;
+    --ink: #e8eef5;
+    --ink-soft: #9aa7b8;
+    --brand: #5b9bd5;
+    --brand-2: #ffd43b;
+    --brand-dark: #8ab8e2;
+    --line: #2a3442;
+    --header-grad: linear-gradient(135deg, #14293f 0%, #1e3a57 55%, #214767 100%);
+    --header-text: #fff;
+    --header-soft: #bfd5ea;
+    --nav-link-bg: rgba(255,255,255,.10);
+    --nav-link-hover: rgba(255,255,255,.22);
+    --chip-active-text: #0f141c;
+    --radius: 14px;
+    --shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+  html[data-theme="light"] {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --ink: #1f2430;
+    --ink-soft: #5a6474;
+    --brand: #3776ab;
+    --brand-2: #e3a008;
+    --brand-dark: #2a5c8a;
+    --line: #e3e8ef;
+    --header-grad: linear-gradient(135deg, #2b6ca3 0%, #3776ab 55%, #3b82b5 100%);
+    --header-text: #fff;
+    --header-soft: #d9e8f5;
+    --nav-link-bg: rgba(255,255,255,.14);
+    --nav-link-hover: rgba(255,255,255,.30);
+    --chip-active-text: #ffffff;
+    --shadow: 0 8px 28px rgba(31,36,48,.08);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--bg); height: 100%; }
+  body {
+    margin: 0;
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: var(--brand-dark); }
+
+header.top {
+    background: var(--header-grad);
+    color: var(--header-text);
+    padding: 16px 20px 12px;
+    border-radius: 24px;
+    margin: 12px;
+  }
+  .brand-row { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 44px; height: 44px; border-radius: 12px;
+    overflow: hidden; display: grid; place-items: center;
+  }
+  .logo svg { width: 100%; height: 100%; display: block; }
+  .logo .boot { fill: var(--brand); }
+  .logo .book2 { fill: var(--brand); }
+  .logo .mglass { stroke: var(--brand); }
+  .logo .mark { fill: var(--brand-2); }
+  html[data-theme="light"] .logo .boot { fill: var(--brand-dark); }
+  html[data-theme="light"] .logo .book2 { fill: var(--brand-dark); }
+  html[data-theme="light"] .logo .mglass { stroke: var(--brand-dark); }
+  .brand-title { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: .2px; }
+  .brand-sub { color: var(--header-soft); margin: 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 620px; }
+  .brand-left { display: flex; align-items: center; gap: 12px; }
+  nav.main { max-width: 1080px; margin: 12px auto 0; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  nav.main a {
+    color: var(--header-text); text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; background: var(--nav-link-bg);
+    transition: background .15s; white-space: nowrap;
+  }
+  nav.main a:hover { background: var(--nav-link-hover); }
+
+
+
+  main { max-width: 1080px; margin: 0 auto; padding: 30px 20px 60px; }
+
+  .hero { text-align: center; padding: 26px 10px 32px; }
+  .hero h1 { font-size: 34px; margin: 0 0 10px; letter-spacing: -.5px; }
+  .hero p { color: var(--ink-soft); max-width: 640px; margin: 0 auto; font-size: 17px; }
+
+  .controls { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 26px; }
+  .searchbar { position: relative; }
+  .searchbar input {
+    width: 100%; padding: 14px 16px 14px 44px; font-size: 16px;
+    border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+    color: var(--ink); box-shadow: var(--shadow);
+  }
+  .searchbar input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+  .searchbar .mag { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); font-size: 18px; }
+  .chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+    padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600;
+    transition: all .15s; font-family: inherit;
+  }
+  .chip:hover { border-color: var(--brand); color: var(--brand); }
+  .chip.active { background: var(--brand); border-color: var(--brand); color: var(--chip-active-text); }
+  .count-hint { color: var(--ink-soft); font-size: 14px; margin: 0; text-align: center; }
+
+  section.cat { margin: 40px 0 0; }
+  section.cat h2 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.3px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  section.cat .cat-desc { color: var(--ink-soft); margin: 0 0 18px; font-size: 15px; text-align: center; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 22px; display: flex; flex-direction: column; min-width: 0;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 21px; }
+  .card .tag { align-self: flex-start; font-size: 12px; font-weight: 700; color: var(--brand-dark);
+    background: rgba(91,155,213,.15); padding: 3px 10px; border-radius: 999px; margin-bottom: 12px; }
+  .card p.desc { margin: 0 0 16px; color: var(--ink); font-size: 15px; }
+  .card .difficulty { margin: 0 0 12px; color: var(--ink-soft); font-size: 14px; }
+  .card .difficulty .stars { display: inline-block; font-size: 20px; line-height: 1; letter-spacing: 3px; color: var(--line); vertical-align: middle; }
+  .card .difficulty .stars .on { color: #f6b20c; text-shadow: 0 0 6px rgba(246, 178, 12, .45); }
+  .card .difficulty { color: var(--ink-soft); font-size: 14px; }
+  .card .lib-logo {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: #ffffff; display: grid; place-items: center;
+    margin: 0; user-select: none; flex-shrink: 0;
+    border: 1px solid var(--line);
+  }
+  .card .lib-logo svg { width: 32px; height: 32px; display: block; }
+  .card .lib-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .card .lib-head .tag { margin: 0; align-self: flex-start; }
+  .card .lib-head h3 { margin: 0; }
+  .card .lib-head-inner { display: flex; flex-direction: column; gap: 6px; }
+  .card .pluses, .card .minuses { margin: 0 0 10px; font-size: 14px; }
+  .card .pluses .title, .card .minuses .title { font-weight: 700; }
+  .card .pluses .title { color: #4dbd77; }
+  .card .minuses .title { color: #e0756c; }
+  .card .pluses ul, .card .minuses ul { margin: 4px 0 0; padding-left: 18px; }
+  .card .pluses li, .card .minuses li { color: var(--ink-soft); margin: 2px 0; }
+  .card .docs {
+    margin-top: auto;
+    display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+    color: var(--brand-dark); text-decoration: none; font-weight: 700; font-size: 14px;
+    border: 1px solid var(--brand); border-radius: 10px; padding: 8px 14px;
+    transition: background .15s;
+  }
+  .card .docs:hover { background: rgba(91,155,213,.15); }
+
+  .empty { text-align: center; color: var(--ink-soft); padding: 40px 0; font-size: 16px; }
+  .empty.hidden { display: none; }
+
+  .taskfind {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 28px; margin: 40px 0 0;
+  }
+  .taskfind h2 { margin: 0 0 6px; font-size: 26px; text-align: center; letter-spacing: -.3px; }
+  .taskfind .tf-sub { color: var(--ink-soft); text-align: center; margin: 0 0 20px; font-size: 15px; }
+  .tf-form { display: flex; gap: 10px; max-width: 640px; margin: 0 auto; }
+  .tf-form input {
+    flex: 1; padding: 14px 16px; font-size: 16px; color: var(--ink);
+    border: 1px solid var(--line); border-radius: 12px; background: var(--bg); font-family: inherit;
+  }
+  .tf-form input:focus { outline: 2px solid var(--brand); border-color: transparent; }
+  .tf-btn { background: var(--brand); color: var(--chip-active-text); border: none; cursor: pointer;
+    border-radius: 12px; font-weight: 700; font-size: 15px; padding: 14px 22px; transition: background .15s; }
+  .tf-btn:hover { opacity: .9; }
+  .tf-examples { text-align: center; margin: 14px 0 0; font-size: 13px; color: var(--ink-soft); }
+  .tf-examples button { background: none; border: 1px solid var(--line); color: var(--brand-dark);
+    border-radius: 999px; padding: 4px 12px; margin: 0 4px 4px; cursor: pointer; font-size: 13px; font-family: inherit; }
+  .tf-examples button:hover { border-color: var(--brand); }
+  .tf-results { margin-top: 24px; }
+  .tf-results.hidden { display: none; }
+  .tf-results h3 { font-size: 17px; margin: 0 0 4px; }
+  .tf-results .tf-reason { color: var(--ink-soft); font-size: 14px; margin: 0 0 16px; }
+  .tf-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .tf-item { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--bg); }
+  .tf-item .tf-name { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; margin-bottom: 8px; }
+  .tf-item .tf-name .lib-logo { width: 36px; height: 36px; border-radius: 8px; }
+  .tf-item .tf-name .lib-logo svg { width: 22px; height: 22px; }
+  .tf-item .tf-why { color: var(--ink-soft); font-size: 13px; margin-bottom: 10px; }
+  .tf-item a { font-size: 13px; font-weight: 700; color: var(--brand-dark); text-decoration: none; }
+  .tf-null { color: var(--ink-soft); text-align: center; padding: 14px; font-size: 14px; }
+
+  .searchpair { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 8px 0 0; }
+  .search-box {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 24px;
+  }
+  .search-box h2 { margin: 0 0 6px; font-size: 22px; letter-spacing: -.3px; }
+  .search-box .sb-sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 14px; }
+  .search-box .searchbar input { padding: 12px 14px 12px 42px; font-size: 15px; }
+  .search-box .tf-form { max-width: none; }
+  @media (max-width: 760px) { .searchpair { grid-template-columns: 1fr; } }
+
+  .guide {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 26px; margin: 30px 0 0;
+  }
+  .guide h2 { margin: 0 0 16px; font-size: 26px; letter-spacing: -.3px; text-align: center; }
+  .guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+  .guide-card { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: var(--bg); }
+  .guide-card h3 { margin: 0 0 8px; font-size: 17px; }
+  .guide-card p { color: var(--ink-soft); font-size: 14px; margin: 0 0 10px; }
+  .guide-card code { background: var(--code-bg, #11151c); color: var(--code-ink, #e6edf3); padding: 2px 6px; border-radius: 5px; font-size: 13px; }
+  .guide-card ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-soft); font-size: 14px; }
+
+  .catalog-shell { margin: 34px 0 0; }
+  .catalog-toggle-btn {
+    display: block; width: 100%; text-align: center; cursor: pointer;
+    background: var(--brand); color: var(--chip-active-text); border: none;
+    border-radius: 14px; font-weight: 800; font-size: 17px; padding: 16px; font-family: inherit;
+    box-shadow: var(--shadow); transition: background .15s;
+  }
+  .catalog-toggle-btn:hover { opacity: .9; }
+  .catalog-body { margin-top: 24px; }
+  .catalog-body.hidden { display: none; }
+  .cat-inline { margin: 26px 0 0; }
+  .cat-inline h2 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.3px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .cat-inline .cat-desc { color: var(--ink-soft); margin: 0 0 18px; font-size: 15px; text-align: center; }
+
+  footer { border-top: 1px solid var(--line); background: var(--surface); padding: 20px; text-align: center; color: var(--ink-soft); font-size: 13px; }
+  footer .footer-links { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+  footer .fbtn { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: border-color .15s; }
+  footer .fbtn:hover { border-color: var(--brand); color: var(--brand-dark); }
+  footer .fbtn-link { text-decoration: none; }
+  footer .fbtn .lang-label { color: var(--brand-dark); font-weight: 700; }
+  .lang-menu { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; margin: 10px auto 0; max-width: 420px; }
+  .lang-menu.open { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+  .lang-menu button { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; }
+  .lang-menu button:hover { border-color: var(--brand); }
+  footer .ftext { margin-top: 12px; }
+
+  .cat-page { margin: 8px 0 0; }
+  .cat-page h1 { font-size: 32px; margin: 0 0 8px; letter-spacing: -.5px; display: flex; align-items: center; gap: 10px; }
+  .cat-page .cat-page-desc { color: var(--ink-soft); margin: 0 0 26px; font-size: 16px; max-width: 640px; }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 26px; }
+    .brand-title { font-size: 18px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    margin: 0 0 12px;
+    border-radius: 0 0 24px 24px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand-row">
+    <div class="brand-left">
+      <div class="logo">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LibraryFinder">
+            <path class="boot" d="M12 44h30v5a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" opacity=".9"/>
+            <rect class="book2" x="16" y="30" width="24" height="16" rx="2" opacity=".55"/>
+            <rect x="18" y="26" width="20" height="16" rx="2" opacity=".3"/>
+            <circle class="mglass" cx="42" cy="22" r="12" fill="none" stroke-width="5"/>
+            <line class="mglass" x1="50" y1="32" x2="60" y2="42" stroke-width="6" stroke-linecap="round"/>
+            <circle class="mark" cx="42" cy="22" r="3.5"/>
+          </svg>
+        </div>
+      <div>
+        <h1 class="brand-title">LibraryFinder</h1>
+        <p class="brand-sub" data-i18n="brand.sub">Каталог библиотек Python с примерами кода</p>
+      </div>
+    </div>
+  </div>
+  <nav class="main" aria-label="Разделы">
+    <a href="index.html" data-i18n="nav.home">&#127891; Главная</a>
+    <a href="category-1.html" data-i18n="nav.c1">&#128187; Анализ данных</a>
+    <a href="category-2.html" data-i18n="nav.c2" aria-current="page">&#128202; Визуализация</a>
+    <a href="category-3.html" data-i18n="nav.c3">&#127760; Веб-разработка</a>
+    <a href="category-4.html" data-i18n="nav.c4">&#129504; ИИ и машинное обучение</a>
+    <a href="category-5.html" data-i18n="nav.c5">&#128451;&#65039; Базы данных</a>
+    <a href="category-6.html" data-i18n="nav.c6">&#9881;&#65039; Автоматизация</a>
+  </nav>
+</header>
+
+<main>
+  <section class="cat-page" id="top">
+    <h1 data-i18n="page.2.h1">></h1>
+    <p class="cat-page-desc" data-i18n="page.2.desc">></p>
+    <div class="grid" data-grid="cat-2"></div>
+  </section>
+</main>
+
+<footer id="footer">
+  <div class="footer-links">
+    <button class="fbtn" id="theme-toggle" aria-label="Переключить тему" data-i18n="ui.theme" aria-label="Переключить тему">&#9728; Тема</button>
+    <a class="fbtn fbtn-link" href="about.html" data-i18n="ui.about">&#128214; О продукте</a>
+    <button class="fbtn" id="lang-btn" aria-label="Выбрать язык"><span class="lang-label" id="lang-label">&#128172; Русский</span></button>
+  </div>
+  <div class="lang-menu" id="lang-menu"></div>
+  <p class="ftext">LibraryFinder &middot; 2026</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var libraryData = [
+    { key: "numpy", name: "NumPy", tag: "Массивы и вычисления", cat: "cat-1", diff: 1,
+      logo: "Np", logoBg: "#4d77cf", logoText: "#fff",
+      desc: "Библиотека для работы с многомерными массивами и числовыми данными. Лежит в основе большинства инструментов анализа данных, научных вычислений и машинного обучения.",
+      plus: ["Очень высокая скорость операций", "Основа экосистемы Python для данных", "Простой порог входа"],
+      minus: ["Свой тип данных — нужно привыкать", "Не подходит для нечисловых задач"],
+      docs: "https://numpy.org/doc/" },
+    { key: "pandas", name: "Pandas", tag: "Таблицы и данные", cat: "cat-1", diff: 2,
+      logo: "Pd", logoBg: "#130654", logoText: "#ffca00",
+      desc: "Библиотека для обработки и анализа структурированных табличных данных. Название происходит от слова «панельные данные». Помогает подготовить и проанализировать данные перед использованием в машинном обучении.",
+      plus: ["Удобная работа с таблицами", "Мощные средства фильтрации и группировки", "Гигантское сообщество"],
+      minus: ["Может быть медленной на больших данных", "Память — большой расход при копировании"],
+      docs: "https://pandas.pydata.org/docs/" },
+    { key: "scipy", name: "SciPy", tag: "Научные расчёты", cat: "cat-1", diff: 3,
+      logo: "Sci", logoBg: "#0a3d62", logoText: "#ffffff",
+      desc: "Платформа для научных и инженерных вычислений. Расширяет NumPy функциями для работы с матрицами, статистикой, интегралами и оптимизацией.",
+      plus: ["Широкий набор научных функций", "Хорошо сочетается с NumPy", "Надёжные и протестированные алгоритмы"],
+      minus: ["Довольно высокая сложность", "Специализированные темы для новичков"],
+      docs: "https://docs.scipy.org/doc/scipy/" },
+    { key: "sklearn", name: "Scikit-learn", tag: "Машинное обучение", cat: "cat-1", diff: 3,
+      logo: "Sk", logoBg: "#f89939", logoText: "#fff",
+      desc: "Библиотека машинного обучения с открытым исходным кодом. Создана в 2007 году как проект Google Summer of Code. Содержит готовые алгоритмы классификации, регрессии и кластеризации.",
+      plus: ["Единый интерфейс для всех моделей", "Много готовых алгоритмов", "Отличная документация"],
+      minus: ["Не подходит для глубокого обучения", "Средняя производительность на больших данных"],
+      docs: "https://scikit-learn.org/stable/" },
+
+    { key: "matplotlib", name: "Matplotlib", tag: "2D/3D графики", cat: "cat-2", diff: 2,
+      logo: "Mpl", logoBg: "#11557c", logoText: "#fff",
+      desc: "Библиотека для визуализации данных двумерной и трёхмерной графикой. Создаёт разные типы графиков и диаграмм и позволяет комбинировать их.",
+      plus: ["Огромный контроль над графиком", "Множество типов диаграмм", "Экспорт во многие форматы"],
+      minus: ["Много кода для простых графиков", "Интерфейс местами устаревший"],
+      docs: "https://matplotlib.org/stable/" },
+    { key: "seaborn", name: "Seaborn", tag: "Статистическая визуализация", cat: "cat-2", diff: 2,
+      logo: "Sb", logoBg: "#2c7fb8", logoText: "#fff",
+      desc: "Высокоуровневая библиотека визуализации, построенная поверх Matplotlib. Даёт готовые решения для типовых задач статистической визуализации.",
+      plus: ["Красивые графики по умолчанию", "Простой код для сложных диаграмм", "Строится на Matplotlib"],
+      minus: ["Меньше контроля, чем в Matplotlib", "Зависит от Pandas и Matplotlib"],
+      docs: "https://seaborn.pydata.org/" },
+    { key: "plotly", name: "Plotly", tag: "Интерактивные графики", cat: "cat-2", diff: 2,
+      logo: "Pl", logoBg: "#3f4f75", logoText: "#fff",
+      desc: "Библиотека визуализации с открытым исходным кодом, создающая интерактивные графики. Широко используется в анализе данных, науке, финансах и веб-разработке.",
+      plus: ["Интерактивные графики по умолчанию", "Красивая современная графика", "Легко встраивается в веб"],
+      minus: ["Интерактивность не всегда нужна", "Тяжелее простых статичных графиков"],
+      docs: "https://plotly.com/python/" },
+    { key: "apacheecharts", name: "Apache ECharts", tag: "Веб-графики", cat: "cat-2", diff: 2,
+      desc: "Библиотека интерактивной визуализации данных. Позволяет строить десятки типов диаграмм и графиков для веб-страниц с богатым набором настроек.",
+      plus: ["Множество типов диаграмм", "Интерактивность по умолчанию", "Хорошая документация"],
+      minus: ["Ориентирована на веб и JS", "Много настроек для освоения"],
+      docs: "https://echarts.apache.org/" },
+    { key: "folium", name: "Folium", tag: "Карты и геоданные", cat: "cat-2", diff: 2,
+      desc: "Библиотека для создания интерактивных карт на основе Leaflet. Позволяет визуализировать геоданные и строить маркеры, полигоны и тепловые карты.",
+      plus: ["Интерактивные карты легко", "Интеграция с GeoPandas", "Визуализация геоданных"],
+      minus: ["Только для карт", "Требует геоданных для пользы"],
+      docs: "https://python-visualization.github.io/folium/" },
+    { key: "chartdotjs", name: "Chart.js", tag: "Графики для веба", cat: "cat-2", diff: 1,
+      desc: "Простая библиотека для построения диаграмм в браузере. Позволяет за несколько строк добавить на сайт красивые и интерактивные графики.",
+      plus: ["Простая в использовании", "Очень лёгкая", "Отличные демо и примеры"],
+      minus: ["Ограничена веб-сферой", "Меньше гибкости, чем у мощных библиотек"],
+      docs: "https://www.chartjs.org/" },
+
+    { key: "flask", name: "Flask", tag: "Микрофреймворк", cat: "cat-3", diff: 2,
+      logo: "Fl", logoBg: "#1a1a1a", logoText: "#cccccc",
+      desc: "Минималистичный веб-фреймворк для создания веб-приложений на Python. Даёт лишь базовые возможности — идеально для небольших сайтов, API и микросервисов.",
+      plus: ["Простой и лёгкий", "Гибкость в компоновке", "Быстрый старт"],
+      minus: ["Нет готового решения для многих задач", "Приходится выбирать компоненты самому"],
+      docs: "https://flask.palletsprojects.com/" },
+    { key: "django", name: "Django", tag: "Полный фреймворк", cat: "cat-3", diff: 3,
+      logo: "Dj", logoBg: "#092e20", logoText: "#44b78b",
+      desc: "Высокоуровневый фреймворк с открытым исходным кодом для быстрой и безопасной разработки серверной части сайтов. Содержит инструменты для типовых задач из коробки.",
+      plus: ["Всё включено (админка, БД, авторизация)", "Высокая безопасность из коробки", "Масштабируемость"],
+      minus: ["Сложный для изучения", "Может быть избыточным для маленьких проектов"],
+      docs: "https://docs.djangoproject.com/" },
+    { key: "fastapi", name: "FastAPI", tag: "API", cat: "cat-3", diff: 2,
+      logo: "FA", logoBg: "#009688", logoText: "#fff",
+      desc: "Современный веб-фреймворк для создания API. Ориентирован на высокую производительность и простоту. За несколько строк кода поднимает сервер, который принимает запросы и возвращает результаты.",
+      plus: ["Очень высокая скорость", "Автоматическая документация API", "Простота и современность"],
+      minus: ["Моложе и меньше примеров, чем у Django", "Ориентирован в первую очередь на API"],
+      docs: "https://fastapi.tiangolo.com/" },
+
+    { key: "os", name: "OS", tag: "Операционная система", cat: "cat-4", diff: 1,
+      logo: "OS", logoBg: "#35557a", logoText: "#fff",
+      desc: "Встроенная библиотека для взаимодействия с операционной системой. Даёт доступ к функциям, зависящим от ОС, и обеспечивает переносимость кода между Windows, macOS и Linux.",
+      plus: ["Встроена в Python — не нужна установка", "Переносимость кода между ОС", "Проста в использовании"],
+      minus: ["Низкий уровень операций", "Не хватает высокоуровневых функций копирования"],
+      docs: "https://docs.python.org/3/library/os.html" },
+    { key: "subprocess", name: "Subprocess", tag: "Запуск процессов", cat: "cat-4", diff: 2,
+      logo: "Sp", logoBg: "#5a6270", logoText: "#fff",
+      desc: "Встроенный модуль для создания новых процессов и подключения к их стандартным потокам. Позволяет запускать системные команды из скрипта и получать их вывод.",
+      plus: ["Запуск любых системных команд", "Контроль над вводом/выводом процессов", "Встроен в Python"],
+      minus: ["Сложнее базового os.system", "Требует понимания процессов ОС"],
+      docs: "https://docs.python.org/3/library/subprocess.html" },
+    { key: "shutil", name: "Shutil", tag: "Файлы и папки", cat: "cat-4", diff: 1,
+      logo: "Sh", logoBg: "#4b5563", logoText: "#e5e7eb",
+      desc: "Встроенный инструмент для высокоуровневых операций с файлами и директориями: копирование, перемещение и удаление. Полезен при автоматизации задач и создании резервных копий.",
+      plus: ["Высокоуровневые операции с файлами", "Встроен в Python", "Удобен для резервных копий"],
+      minus: ["Ограничен только файловыми операциями", "Не ладит с правами доступа на разных ОС"],
+      docs: "https://docs.python.org/3/library/shutil.html" },
+    { key: "psutil", name: "Psutil", tag: "Мониторинг системы", cat: "cat-4", diff: 2,
+      logo: "Ps", logoBg: "#166534", logoText: "#fff",
+      desc: "Кроссплатформенная библиотека для получения информации о процессах и использовании системы — CPU, память, диски и сеть. Подходит для мониторинга в Jupyter Notebook и скриптах.",
+      plus: ["Полный доступ к системным данным", "Кроссплатформенность", "Простой и понятный API"],
+      minus: ["Нуждается в установке", "Специфична для задач мониторинга"],
+      docs: "https://psutil.readthedocs.io/" }
+  ];
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function diffStars(n) {
+    var on = "<span class=\"on\">&#9733;</span>".repeat(n);
+    var off = "<span class=\"off\">&#9734;</span>".repeat(3 - n);
+    return '<span class="stars">' + on + off + '</span>';
+  }
+
+  function listHTML(items, cls) {
+    return '<ul>' + items.map(function (it) {
+      return '<li>' + esc(it) + '</li>';
+    }).join("") + '</ul>';
+  }
+
+  var LOGOS = {
+    numpy: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>NumPy</title><path d="M10.315 4.876L6.3048 2.8517l-4.401 2.1965 4.1186 2.0683zm1.8381.9277l4.2045 2.1223-4.3622 2.1906-4.125-2.0718zm5.6153-2.9213l4.3193 2.1658-3.863 1.9402-4.2131-2.1252zm-1.859-.9329L12.021 0 8.1742 1.9193l4.0068 2.0208zm-3.0401 16.7443V24l4.7107-2.3507-.0053-5.3085zm4.7037-4.2057l-.0052-5.2528-4.6985 2.3356v5.2546zm5.6553-.9845v5.327l-4.0178 2.0052-.0029-5.3028zm0-1.8626V6.4214l-4.0253 2.001.0034 5.2633zM11.2062 11.571L8.0333 9.9756v6.895s-3.8804-8.2564-4.2399-8.998c-.0463-.0957-.2371-.2007-.2858-.2262C2.8118 7.2812.773 6.2485.773 6.2485V18.43l2.8204 1.5076v-6.3674s3.8392 7.3775 3.878 7.458c.0389.0807.4245.8582.8362 1.1314.5485.363 2.8992 1.7766 2.8992 1.7766z"/></svg>',
+    pandas: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>pandas</title><path d="M16.922 0h2.623v18.104h-2.623zm-4.126 12.94h2.623v2.57h-2.623zm0-7.037h2.623v5.446h-2.623zm0 11.197h2.623v5.446h-2.623zM4.456 5.896h2.622V24H4.455zm4.213 2.559h2.623v2.57H8.67zm0 4.151h2.623v5.447H8.67zm0-11.187h2.623v5.446H8.67Z"/></svg>',
+    scipy: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>SciPy</title><path d="M15.697 13.496c-.784-1.072-1.982-1.519-3.694-1.88l-1.592-.375-1.201-.515c-.631-.446-1.17-1.634-1.017-2.681a3 3 0 0 1 3.386-2.526 2.962 2.962 0 0 1 1.962 1.155L15.35 9.05c1.033 1.33 2.195 1.727 3.459 1.098l.637-.27a.22.22 0 0 1 .278.087l.127.19a.311.311 0 0 0 .156.131.326.326 0 0 0 .33-.058l1.467-1.384c.257-.22.182-.422.182-.422l-.354-.806s-.097-.193-.431-.149l-1.968.181a.327.327 0 0 0-.27.411l.071.227c.014.047.014.1-.005.148a.219.219 0 0 1-.124.125l-.556.235c-.582.341-1.244.123-1.686-.417l-.505-.67-1.438-1.91a4.421 4.421 0 0 0-2.929-1.72C9.355 3.733 7.095 5.42 6.741 7.84c-.179 1.22.187 2.375.855 3.302.485.674 1.373 1.06 1.854 1.18l1.262.36 1.208.277c.166.04.634.155.91.255.256.092.845.31 1.324.701.572.582.875 1.413.746 2.284a2.744 2.744 0 0 1-4.897 1.255l-1.726-2.292a2.294 2.294 0 0 0-1.514-.89 2.31 2.31 0 0 0-1.708.439l-3.632 2.71A11.002 11.002 0 0 1 0 12C0 5.798 5.133.768 11.465.768c4.715 0 8.761 2.788 10.523 6.77l.581-.27.393-1.072.411.144-.353.96.98.337-.148.402-1.095-.382-.603.277c.5 1.262.778 2.632.778 4.066 0 6.203-5.135 11.232-11.467 11.232a11.526 11.526 0 0 1-9.26-4.61l3.721-2.788a.855.855 0 0 1 1.163.19l1.826 2.455a4.186 4.186 0 0 0 2.673 1.502c2.302.322 4.439-1.273 4.773-3.563a4.14 4.14 0 0 0-.664-2.922"/></svg>',
+    sklearn: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>scikit-learn</title><path d="M15.601 5.53c-1.91.035-3.981.91-5.63 2.56-2.93 2.93-2.083 8.53-1.088 9.525.805.804 6.595 1.843 9.526-1.088a9.74 9.74 0 0 0 .584-.643c.043-.292.205-.66.489-1.106a1.848 1.848 0 0 1-.537.176c-.144.265-.37.55-.676.855-.354.335-.607.554-.76.656a.795.795 0 0 1-.437.152c-.35 0-.514-.308-.494-.924-.22.316-.425.549-.612.7a.914.914 0 0 1-.578.224c-.194 0-.36-.09-.496-.273a1.03 1.03 0 0 1-.193-.507 4.016 4.016 0 0 1-.726.583c-.224.132-.47.197-.74.197-.3 0-.543-.096-.727-.288a.978.978 0 0 1-.257-.524v.004c-.3.276-.564.48-.79.611a1.295 1.295 0 0 1-.649.197.693.693 0 0 1-.571-.275c-.145-.183-.218-.43-.218-.739 0-.464.101-1.02.302-1.67.201-.65.445-1.25.733-1.797l.842-.312a.21.21 0 0 1 .06-.013c.063 0 .116.047.157.14.04.095.061.221.061.38 0 .451-.104.888-.312 1.31-.207.422-.532.873-.974 1.352-.018.23-.027.388-.027.474 0 .193.036.345.106.458.071.113.165.169.282.169a.71.71 0 0 0 .382-.13c.132-.084.333-.26.602-.523.028-.418.187-.798.482-1.142.324-.38.685-.569 1.08-.569.206 0 .37.054.494.16a.524.524 0 0 1 .186.417c0 .458-.486.829-1.459 1.114.088.43.32.646.693.646a.807.807 0 0 0 .417-.117c.129-.076.321-.243.575-.497.032-.252.118-.495.259-.728.182-.3.416-.544.701-.73.285-.185.537-.278.756-.278.276 0 .47.127.58.381l.677-.374h.186l-.292.971c-.15.488-.226.823-.226 1.004 0 .19.067.285.202.285.086 0 .181-.045.285-.137.104-.092.25-.232.437-.42v.001c.143-.155.274-.32.392-.494-.19-.084-.285-.21-.285-.375 0-.17.058-.352.174-.545.116-.194.275-.29.479-.29.172 0 .258.088.258.265 0 .139-.05.338-.149.596.367-.04.687-.32.961-.842l.228-.01c1.059-2.438.828-5.075-.83-6.732-1.019-1.02-2.408-1.5-3.895-1.471zm4.725 8.203a8.938 8.938 0 0 1-1.333 2.151 1.09 1.09 0 0 0-.012.147c0 .168.047.309.14.423.092.113.206.17.34.17.296 0 .714-.264 1.254-.787-.001.04-.003.08-.003.121 0 .146.012.368.036.666l.733-.172c0-.2.003-.357.01-.474.01-.157.033-.33.066-.517.02-.11.07-.216.152-.315l.186-.216a5.276 5.276 0 0 1 .378-.397c.062-.055.116-.099.162-.13a.26.26 0 0 1 .123-.046c.055 0 .083.035.083.106 0 .07-.052.236-.156.497-.194.486-.292.848-.292 1.084 0 .175.046.314.136.418a.45.45 0 0 0 .358.155c.365 0 .803-.269 1.313-.808v-.381c-.361.426-.623.64-.784.64-.109 0-.163-.067-.163-.2 0-.1.065-.316.195-.65.19-.486.285-.836.285-1.048a.464.464 0 0 0-.112-.319.36.36 0 0 0-.282-.127c-.165 0-.354.077-.567.233-.213.156-.5.436-.863.84.053-.262.165-.622.335-1.08l-.809.156a6.54 6.54 0 0 0-.399 1.074c-.04.156-.07.316-.092.48a7.447 7.447 0 0 1-.49.45.38.38 0 0 1-.229.08.208.208 0 0 1-.174-.082.352.352 0 0 1-.064-.222c0-.1.019-.214.056-.343.038-.13.12-.373.249-.731l.308-.849zm-17.21-2.927c-.863-.016-1.67.263-2.261.854-1.352 1.352-1.07 3.827.631 5.527 1.7 1.701 4.95 1.21 5.527.632.467-.466 1.07-3.827-.631-5.527-.957-.957-2.158-1.465-3.267-1.486zm12.285.358h.166v.21H15.4zm.427 0h.166v.865l.46-.455h.195l-.364.362.428.684h-.198l-.357-.575-.164.166v.41h-.166zm1.016 0h.166v.21h-.166zm.481.122h.166v.288h.172v.135h-.172v.717c0 .037.006.062.02.075.012.013.037.02.074.02a.23.23 0 0 0 .078-.01v.141a.802.802 0 0 1-.136.014.23.23 0 0 1-.15-.043.15.15 0 0 1-.052-.123v-.79h-.141v-.136h.141zm-3.562.258c.081 0 .15.012.207.038.057.024.1.061.13.11s.045.106.045.173h-.176c-.006-.111-.075-.167-.208-.167a.285.285 0 0 0-.164.041.134.134 0 0 0-.06.117c0 .035.015.065.045.088.03.024.08.044.15.06l.16.039a.47.47 0 0 1 .224.105c.047.046.07.108.07.186a.3.3 0 0 1-.052.175.327.327 0 0 1-.152.116.585.585 0 0 1-.226.041c-.136 0-.24-.03-.309-.088-.069-.059-.105-.149-.109-.269h.176c.004.037.01.065.017.084a.166.166 0 0 0 .034.054c.044.043.112.065.204.065a.31.31 0 0 0 .177-.045.139.139 0 0 0 .067-.119.116.116 0 0 0-.038-.09.287.287 0 0 0-.124-.055l-.156-.038a1.248 1.248 0 0 1-.159-.05.359.359 0 0 1-.098-.061.22.22 0 0 1-.058-.083.32.32 0 0 1-.016-.108c0-.096.036-.174.109-.232a.45.45 0 0 1 .29-.087zm1.035 0a.46.46 0 0 1 .202.043.351.351 0 0 1 .187.212.577.577 0 0 1 .023.126h-.168a.256.256 0 0 0-.078-.168.242.242 0 0 0-.17-.06.248.248 0 0 0-.155.05.306.306 0 0 0-.1.144.662.662 0 0 0-.034.224.58.58 0 0 0 .035.214.299.299 0 0 0 .101.135.261.261 0 0 0 .157.048c.142 0 .227-.084.256-.252h.167a.519.519 0 0 1-.065.22.35.35 0 0 1-.146.138.464.464 0 0 1-.216.048.448.448 0 0 1-.246-.066.441.441 0 0 1-.161-.192.703.703 0 0 1-.057-.293c0-.085.01-.163.032-.233a.522.522 0 0 1 .095-.182.403.403 0 0 1 .15-.117.453.453 0 0 1 .191-.04zm.603.03h.166v1.046H15.4zm1.443 0h.166v1.046h-.166zm-5.05.618c-.08 0-.2.204-.356.611-.155.407-.308.977-.459 1.71.281-.312.509-.662.683-1.05.175-.387.262-.72.262-.999a.455.455 0 0 0-.036-.197c-.025-.05-.056-.075-.093-.075zm4.662 1.797c-.221 0-.431.188-.629.563-.197.376-.296.722-.296 1.038 0 .12.029.216.088.29a.273.273 0 0 0 .223.111c.221 0 .43-.188.625-.565.196-.377.294-.725.294-1.043a.457.457 0 0 0-.083-.29.269.269 0 0 0-.222-.104zm-2.848.007c-.146 0-.285.11-.417.333-.133.222-.2.51-.2.866.566-.159.849-.452.849-.881 0-.212-.077-.318-.232-.318Z"/></svg>',
+    matplotlib: '<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="167.76pt" height="167.76pt" viewBox="0 0 167.76 167.76" xmlns="http://www.w3.org/2000/svg" version="1.1"><g id="figure_1"><g id="patch_1"><path d="M 0 167.76 L 167.76 167.76 L 167.76 0 L 0 0 L 0 167.76 z " style="fill: none; opacity: 0"/></g><g id="axes_1"><g id="patch_2"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 167.808464 83.88 C 167.808464 94.901385 165.637491 105.815601 161.41979 115.998033 C 157.202089 126.180465 151.019682 135.43309 143.226386 143.226386 C 135.43309 151.019682 126.180465 157.202089 115.998033 161.41979 C 105.815601 165.637491 94.901385 167.808464 83.88 167.808464 C 72.858615 167.808464 61.944399 165.637491 51.761967 161.41979 C 41.579535 157.202089 32.32691 151.019682 24.533614 143.226386 C 16.740318 135.43309 10.557911 126.180465 6.34021 115.998033 C 2.122509 105.815601 -0.048464 94.901385 -0.048464 83.88 C -0.048464 72.858615 2.122509 61.944399 6.34021 51.761967 C 10.557911 41.579535 16.740318 32.32691 24.533614 24.533614 C 32.32691 16.740318 41.579535 10.557911 51.761967 6.34021 C 61.944399 2.122509 72.858615 -0.048464 83.88 -0.048464 C 94.901385 -0.048464 105.815601 2.122509 115.998033 6.34021 C 126.180465 10.557911 135.43309 16.740318 143.226386 24.533614 C 151.019682 32.32691 157.202089 41.579535 161.41979 51.761967 C 165.637491 61.944399 167.808464 72.858615 167.808464 83.88 z " style="fill: #ffffff; fill-opacity: 0.9"/></g><g id="matplotlib.axis_1"><g id="xtick_1"><g id="line2d_1"><path d="M 83.88 83.88 L 162.7272 83.88 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_2"><g id="line2d_2"><path d="M 83.88 83.88 L 139.63339 28.12661 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_3"><g id="line2d_3"><path d="M 83.88 83.88 L 83.88 5.0328 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_4"><g id="line2d_4"><path d="M 83.88 83.88 L 28.12661 28.12661 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_5"><g id="line2d_5"><path d="M 83.88 83.88 L 5.0328 83.88 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_6"><g id="line2d_6"><path d="M 83.88 83.88 L 28.12661 139.63339 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_7"><g id="line2d_7"><path d="M 83.88 83.88 L 83.88 162.7272 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="xtick_8"><g id="line2d_8"><path d="M 83.88 83.88 L 139.63339 139.63339 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g></g><g id="matplotlib.axis_2"><g id="ytick_1"><g id="line2d_9"><path d="M 92.6408 83.88 C 92.6408 82.729542 92.414185 81.590271 91.973924 80.527387 C 91.533663 79.464503 90.888318 78.498675 90.074821 77.685179 C 89.261325 76.871682 88.295497 76.226337 87.232613 75.786076 C 86.169729 75.345815 85.030458 75.1192 83.88 75.1192 C 82.729542 75.1192 81.590271 75.345815 80.527387 75.786076 C 79.464503 76.226337 78.498675 76.871682 77.685179 77.685179 C 76.871682 78.498675 76.226337 79.464503 75.786076 80.527387 C 75.345815 81.590271 75.1192 82.729542 75.1192 83.88 C 75.1192 85.030458 75.345815 86.169729 75.786076 87.232613 C 76.226337 88.295497 76.871682 89.261325 77.685179 90.074821 C 78.498675 90.888318 79.464503 91.533663 80.527387 91.973924 C 81.590271 92.414185 82.729542 92.6408 83.88 92.6408 C 85.030458 92.6408 86.169729 92.414185 87.232613 91.973924 C 88.295497 91.533663 89.261325 90.888318 90.074821 90.074821 C 90.888318 89.261325 91.533663 88.295497 91.973924 87.232613 C 92.414185 86.169729 92.6408 85.030458 92.6408 83.88 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="ytick_2"><g id="line2d_10"><path d="M 110.1624 83.88 C 110.1624 80.428627 109.482555 77.010814 108.161771 73.822161 C 106.840988 70.633508 104.904953 67.736026 102.464463 65.295537 C 100.023974 62.855047 97.126492 60.919012 93.937839 59.598229 C 90.749186 58.277445 87.331373 57.5976 83.88 57.5976 C 80.428627 57.5976 77.010814 58.277445 73.822161 59.598229 C 70.633508 60.919012 67.736026 62.855047 65.295537 65.295537 C 62.855047 67.736026 60.919012 70.633508 59.598229 73.822161 C 58.277445 77.010814 57.5976 80.428627 57.5976 83.88 C 57.5976 87.331373 58.277445 90.749186 59.598229 93.937839 C 60.919012 97.126492 62.855047 100.023974 65.295537 102.464463 C 67.736026 104.904953 70.633508 106.840988 73.822161 108.161771 C 77.010814 109.482555 80.428627 110.1624 83.88 110.1624 C 87.331373 110.1624 90.749186 109.482555 93.937839 108.161771 C 97.126492 106.840988 100.023974 104.904953 102.464463 102.464463 C 104.904953 100.023974 106.840988 97.126492 108.161771 93.937839 C 109.482555 90.749186 110.1624 87.331373 110.1624 83.88 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="ytick_3"><g id="line2d_11"><path d="M 127.684 83.88 C 127.684 78.127711 126.550925 72.431357 124.349619 67.116935 C 122.148314 61.802513 118.921588 56.973377 114.854105 52.905895 C 110.786623 48.838412 105.957487 45.611686 100.643065 43.410381 C 95.328643 41.209075 89.632289 40.076 83.88 40.076 C 78.127711 40.076 72.431357 41.209075 67.116935 43.410381 C 61.802513 45.611686 56.973377 48.838412 52.905895 52.905895 C 48.838412 56.973377 45.611686 61.802513 43.410381 67.116935 C 41.209075 72.431357 40.076 78.127711 40.076 83.88 C 40.076 89.632289 41.209075 95.328643 43.410381 100.643065 C 45.611686 105.957487 48.838412 110.786623 52.905895 114.854105 C 56.973377 118.921588 61.802513 122.148314 67.116935 124.349619 C 72.431357 126.550925 78.127711 127.684 83.88 127.684 C 89.632289 127.684 95.328643 126.550925 100.643065 124.349619 C 105.957487 122.148314 110.786623 118.921588 114.854105 114.854105 C 118.921588 110.786623 122.148314 105.957487 124.349619 100.643065 C 126.550925 95.328643 127.684 89.632289 127.684 83.88 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g><g id="ytick_4"><g id="line2d_12"><path d="M 145.2056 83.88 C 145.2056 75.826796 143.619294 67.851899 140.537467 60.411709 C 137.455639 52.971519 132.938223 46.210728 127.243748 40.516252 C 121.549272 34.821777 114.788481 30.304361 107.348291 27.222533 C 99.908101 24.140706 91.933204 22.5544 83.88 22.5544 C 75.826796 22.5544 67.851899 24.140706 60.411709 27.222533 C 52.971519 30.304361 46.210728 34.821777 40.516252 40.516252 C 34.821777 46.210728 30.304361 52.971519 27.222533 60.411709 C 24.140706 67.851899 22.5544 75.826796 22.5544 83.88 C 22.5544 91.933204 24.140706 99.908101 27.222533 107.348291 C 30.304361 114.788481 34.821777 121.549272 40.516252 127.243748 C 46.210728 132.938223 52.971519 137.455639 60.411709 140.537467 C 67.851899 143.619294 75.826796 145.2056 83.88 145.2056 C 91.933204 145.2056 99.908101 143.619294 107.348291 140.537467 C 114.788481 137.455639 121.549272 132.938223 127.243748 127.243748 C 132.938223 121.549272 137.455639 114.788481 140.537467 107.348291 C 143.619294 99.908101 145.2056 91.933204 145.2056 83.88 " clip-path="url(#pccb0f66489)" style="fill: none; stroke: #e6e6e6; stroke-linecap: square"/></g></g></g><g id="patch_3"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 100.544032 78.465528 C 100.827679 79.338503 101.042289 80.232419 101.18588 81.139018 C 101.329471 82.045617 101.4016 82.9621 101.4016 83.88 z " clip-path="url(#pccb0f66489)" style="fill: #004cff; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_4"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 102.349947 34.667001 C 104.928058 35.634582 107.426154 36.803257 109.821161 38.162231 C 112.216167 39.521205 114.500687 41.06628 116.653617 42.783184 z " clip-path="url(#pccb0f66489)" style="fill: #ceff29; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_5"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 38.963335 30.078544 C 43.193773 26.546722 47.826049 23.526156 52.764087 21.079495 C 57.702125 18.632834 62.911548 16.77711 68.284309 15.550812 z " clip-path="url(#pccb0f66489)" style="fill: #ff6800; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_6"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 23.539928 94.830109 C 22.390882 88.498347 22.245596 82.025002 23.109411 75.648064 C 23.973226 69.271127 25.835425 63.069714 28.627544 57.271819 z " clip-path="url(#pccb0f66489)" style="fill: #ffc400; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_7"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 55.074417 103.836559 C 54.551888 103.082334 54.059183 102.307877 53.597441 101.51498 C 53.135699 100.722082 52.705276 99.911356 52.307168 99.084675 z " clip-path="url(#pccb0f66489)" style="fill: #29ffce; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_8"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 91.217443 127.065094 C 88.388717 127.545714 85.519599 127.747241 82.651462 127.666769 C 79.783325 127.586296 76.93002 127.224214 74.132693 126.585742 z " clip-path="url(#pccb0f66489)" style="fill: #7dff7a; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_9"><path d="M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 L 139.162587 126.960611 C 137.470326 129.132181 135.651582 131.202154 133.71581 133.159767 C 131.780039 135.117381 129.730602 136.959235 127.578156 138.675754 z " clip-path="url(#pccb0f66489)" style="fill: #ff6800; fill-opacity: 0.6; stroke: #4c4c4c; stroke-width: 1.5; stroke-linejoin: miter"/></g><g id="patch_10"><path d="M 162.7272 83.88 C 162.7272 73.525881 160.687664 63.272442 156.725314 53.706483 C 152.762964 44.140524 146.954858 35.448078 139.63339 28.12661 C 132.311922 20.805142 123.619476 14.997036 114.053517 11.034686 C 104.487558 7.072336 94.234119 5.0328 83.88 5.0328 C 73.525881 5.0328 63.272442 7.072336 53.706483 11.034686 C 44.140524 14.997036 35.448078 20.805142 28.12661 28.12661 C 20.805142 35.448078 14.997036 44.140524 11.034686 53.706483 C 7.072336 63.272442 5.0328 73.525881 5.0328 83.88 C 5.0328 94.234119 7.072336 104.487558 11.034686 114.053517 C 14.997036 123.619476 20.805142 132.311922 28.12661 139.63339 C 35.448078 146.954858 44.140524 152.762964 53.706483 156.725314 C 63.272442 160.687664 73.525881 162.7272 83.88 162.7272 C 94.234119 162.7272 104.487558 160.687664 114.053517 156.725314 C 123.619476 152.762964 132.311922 146.954858 139.63339 139.63339 C 146.954858 132.311922 152.762964 123.619476 156.725314 114.053517 C 160.687664 104.487558 162.7272 94.234119 162.7272 83.88 " style="fill: none; stroke: #11557c; stroke-width: 4; stroke-linejoin: miter; stroke-linecap: square"/></g></g></g><defs><clipPath id="pccb0f66489"><path d="M 162.7272 83.88 C 162.7272 73.525881 160.687664 63.272442 156.725314 53.706483 C 152.762964 44.140524 146.954858 35.448078 139.63339 28.12661 C 132.311922 20.805142 123.619476 14.997036 114.053517 11.034686 C 104.487558 7.072336 94.234119 5.0328 83.88 5.0328 C 73.525881 5.0328 63.272442 7.072336 53.706483 11.034686 C 44.140524 14.997036 35.448078 20.805142 28.12661 28.12661 C 20.805142 35.448078 14.997036 44.140524 11.034686 53.706483 C 7.072336 63.272442 5.0328 73.525881 5.0328 83.88 C 5.0328 94.234119 7.072336 104.487558 11.034686 114.053517 C 14.997036 123.619476 20.805142 132.311922 28.12661 139.63339 C 35.448078 146.954858 44.140524 152.762964 53.706483 156.725314 C 63.272442 160.687664 73.525881 162.7272 83.88 162.7272 C 94.234119 162.7272 104.487558 160.687664 114.053517 156.725314 C 123.619476 152.762964 132.311922 146.954858 139.63339 139.63339 C 146.954858 132.311922 152.762964 123.619476 156.725314 114.053517 C 160.687664 104.487558 162.7272 94.234119 162.7272 83.88 M 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 C 83.88 83.88 83.88 83.88 83.88 83.88 M 162.7272 83.88 z "/></clipPath></defs></svg>',
+    seaborn: '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 128 128"><path fill="#fff" stroke="#fff" d="M79.2 145.098A65.901 65.901 0 0 0 145.098 79.2 65.901 65.901 0 0 0 79.2 13.302 65.901 65.901 0 0 0 13.302 79.2 65.901 65.901 0 0 0 79.2 145.098Z" clip-path="url(#a)" transform="matrix(.94648 0 0 .90086 -10.962 -7.349)"/><g transform="matrix(.94648 0 0 .90086 -10.962 -7.349)"><defs><path id="c" d="M-6.224-74.826V-2.35h170.847v-67.076l-2.44-.165-2.44-.188-2.441-.215-2.441-.243-2.44-.276-2.441-.31-2.441-.346-2.44-.386-2.441-.428-2.441-.473-2.44-.519-2.441-.567-2.441-.617-2.44-.667-2.441-.718-2.441-.77-2.44-.819-2.441-.867-2.441-.915-2.44-.957-2.442-.997-2.44-1.032-2.44-1.061-2.442-1.085-2.44-1.1-2.44-1.11-2.442-1.108-2.44-1.1-2.44-1.081-2.442-1.054-2.44-1.016-2.441-.968-2.44-.91-2.441-.845-2.441-.768-2.44-.685-2.441-.592-2.441-.495-2.44-.39-2.441-.283-2.441-.171-2.44-.057-2.441.057-2.441.17-2.44.283-2.441.391-2.441.495-2.44.592-2.441.685-2.441.768-2.44.844-2.442.911-2.44.968-2.44 1.016-2.442 1.054-2.44 1.081-2.44 1.1-2.442 1.109-2.44 1.109-2.44 1.1-2.442 1.085-2.44 1.06-2.441 1.033-2.44.997-2.441.957L3.539-78l-2.44.867-2.441.82-2.441.769z"/></defs><g clip-path="url(#b)"><use xlink:href="#c" width="100%" height="100%" y="170.634" fill="#5c7da2"/></g></g><g transform="matrix(.94648 0 0 .90086 -10.962 -7.349)"><defs><path id="d" d="M-6.224-98.448v22.402l2.44-.719 2.442-.769 2.44-.819 2.441-.868 2.44-.914 2.441-.957 2.441-.998 2.44-1.031 2.441-1.062 2.441-1.084 2.44-1.1 2.441-1.11 2.441-1.108 2.44-1.1 2.441-1.082 2.441-1.053 2.44-1.016 2.441-.968 2.441-.91 2.44-.845 2.442-.768 2.44-.685 2.44-.593 2.442-.494 2.44-.391 2.44-.283 2.442-.17 2.44-.057 2.44.057 2.442.17 2.44.283 2.441.39 2.44.495 2.441.593 2.441.685 2.44.768 2.441.844 2.441.91 2.44.969 2.441 1.016 2.441 1.053 2.44 1.082 2.441 1.1 2.441 1.109 2.44 1.108 2.441 1.1 2.441 1.085 2.44 1.062 2.441 1.031 2.441.998 2.44.957 2.442.914 2.44.868 2.44.82 2.442.768 2.44.719 2.44.665 2.442.606 2.44.542 2.44.473 2.442.4 2.44.322 2.44.24 2.442.15 2.44.06 2.44-.03 2.442-.122 2.44-.217 2.44-.313 2.442-.41 2.44-.507 2.44-.604 2.442-.7 2.44-.796 2.44-.89 2.442-.98 2.44-1.068 2.44-1.15 2.442-1.228 2.44-1.3 2.44-1.365 2.442-1.422 2.44-1.472 2.44-1.513 2.442-1.544 2.44-1.567 2.44-1.578 2.442-1.578 2.44-1.568 2.44-1.545 2.442-1.512 2.44-1.466 2.44-1.41 2.442-1.34 2.44-1.26 2.44-1.168 2.442-1.066 2.44-.953 2.44-.83 2.442-.697 2.44-.555 2.44-.403 2.442-.243 2.44-.074 2.44.103 2.442.288 2.44.479 2.44.676 2.442.877 2.44 1.082 2.44 1.29 2.442 1.5 2.44 1.71 2.44 1.92 2.442 2.129 2.44 2.335 2.44 2.538 2.442 2.736 2.44 2.928 2.44 3.113 2.442 3.292 2.44 3.461 2.44 3.62 2.442 3.77 2.44 3.908 2.44 4.034 2.442 4.148 2.44 4.247 2.44 4.332 2.442 4.402 2.44 4.456 2.44 4.493 2.442 4.513 2.44 4.514 2.44 4.497 2.442 4.46 2.44 4.403 2.44 4.326 2.442 4.228 2.44 4.109 2.44 3.968 2.442 3.806 2.44 3.622 2.44 3.416 2.442 3.188 2.44 2.937 2.44 2.665 2.442 2.37 2.44 2.053 2.44 1.714 2.442 1.353 2.44.97 2.44.565 2.442.14 2.44-.307 2.44-.776 2.442-1.266 2.44-1.778 2.44-2.31 2.442-2.862 2.44-3.433 2.44-4.022 2.442-4.628 2.44-5.25 2.44-5.887 2.442-6.538 2.44-7.202 2.44-7.877 2.442-8.562 2.44-9.257 2.44-9.958 2.442-10.666 2.44-11.378 2.44-12.092 2.442-12.807 2.44-13.52 2.44-14.23 2.442-14.935 2.44-15.632 2.44-16.32 2.442-16.997 2.44-17.66 2.44-18.31 2.442-18.943 2.44-19.558 2.44-20.152 2.442-20.725 2.44-21.274 2.44-21.798 2.442-22.295 2.44-22.763 2.44-23.201 2.442-23.607 2.44-23.98 2.44-24.32 2.442-24.622 2.44-24.89 2.44-25.122 2.442-25.316 2.44-25.472 2.44-25.588 2.442-25.664 2.44-25.698 2.44-25.69 2.442-25.64 2.44-25.545 2.44-25.407 2.442-25.225 2.44-24.998 2.44-24.726 2.442-24.409 2.44-24.047 2.44-23.64 2.442-23.187 2.44-22.689 2.44-22.145 2.442-21.556 2.44-20.921 2.44-20.242 2.442-19.517 2.44-18.748 2.44-17.933 2.442-17.074 2.44-16.17 2.44-15.221 2.442-14.228 2.44-13.19 2.44-12.109 2.442-10.984 2.44-9.816 2.44-8.604 2.442-7.349z"/></defs><g clip-path="url(#b)"><use xlink:href="#d" width="100%" height="100%" y="170.634" fill="#7db0bc"/></g></g><g transform="matrix(.94648 0 0 .90086 -10.962 -7.349)"><defs><path id="e" d="M-6.224-121.32v24.19l7.28 3.301 4.61 2.07 4.607 2.041 4.605 1.99 4.6 1.924 4.597 1.84 4.592 1.738 4.587 1.617 4.582 1.479 4.578 1.328 4.574 1.163 4.57.986 4.566.802 4.563.611 4.56.415 4.557.216 4.556.013 4.554-.192 4.553-.4 4.551-.607 4.55-.811 4.55-1.012 4.55-1.207 4.55-1.395 4.55-1.574 4.55-1.742 4.55-1.899 4.55-2.041 4.55-2.168 4.55-2.278 4.55-2.37 4.55-2.441 4.55-2.49 4.55-2.516 4.55-2.517 4.55-2.494 4.55-2.444 4.55-2.367 4.55-2.261 4.55-2.126 4.55-1.961 4.55-1.765 4.55-1.539 4.55-1.282 4.55-.993 4.55-.674 4.55-.325 4.55.056 4.55.466 4.55.905 4.55 1.372 4.55 1.865 4.55 2.382 4.55 2.922 4.55 3.484 4.55 4.065 4.55 4.664 4.55 5.278 4.55 5.905 4.55 6.543 4.55 7.19 4.55 7.843 4.55 8.5 4.55 9.16 4.55 9.82 4.55 10.477 4.55 11.128 4.55 11.772 4.55 12.407 4.55 13.03 4.55 13.639 4.55 14.232 4.55 14.807 4.55 15.36 4.55 15.89 4.55 16.395 4.55 16.872 4.55 17.319 4.55 17.734 4.55 18.115 4.55 18.459 4.55 18.764 4.55 19.029 4.55 19.251 4.55 19.428 4.55 19.559 4.55 19.642 4.55 19.675 4.55 19.657 4.55 19.587 4.55 19.462 4.55 19.283 4.55 19.048 4.55 18.756 4.55 18.407 4.55 17.999 4.55 17.532 4.55 17.004 4.55 16.415 4.55 15.765 4.55 15.052 4.55 14.276 4.55 13.436 4.55 12.532 4.55 11.564 4.55 10.53 4.55 9.431 4.55 8.266 4.55 7.035 4.55 5.737 4.55 4.372 4.55 2.941 4.55 1.443 4.55-.122 3.667-.746v21.4l-.502-.205-2.737.81z"/></defs><path fill="#fff" d="m169.577 60.045 4.643.108 4.643.325 4.642.537 4.641.743 4.64.94 4.638 1.127 4.636 1.3 4.634 1.46 4.632 1.601 4.636 1.73 4.627 1.836 4.626 1.925 4.625 1.997 4.623 2.048 4.201 1.893a120.778 120.778 0 0 1 10.087 45.827l.017 1.024.01 1.534-.01 1.531a120.784 120.784 0 0 1 -4.933 32.663l-5.07-1.077-4.63-1.076-4.63-1.17-4.629-1.266-4.63-1.363-4.628-1.458-4.628-1.554-4.628-1.646-4.627-1.733-4.627-1.815-4.626-1.89-4.624-1.955-4.624-2.01-4.622-2.054-4.622-2.084-9.238-4.197-4.618-2.08-4.615-2.046-4.614-1.992-4.612-1.92-4.61-1.828-4.615-1.722-4.608-1.594-4.606-1.45-4.604-1.291-4.602-1.118-4.6-.932-4.6-.737-4.597-.532-4.598-.321-4.596-.108-4.597.108-4.597.321-4.598.532-4.6.737-4.6.932-4.602 1.118-4.604 1.29-4.606 1.451-4.607 1.594-4.605 1.718-4.612 1.83-4.614 1.92-4.616 1.992-4.617 2.046-4.619 2.081-9.241 4.199-4.622 2.084-4.647 2.065a120.776 120.776 0 0 1 .465-31.882l3.892-.617 4.611-.809 4.612-.892 4.61-.98 4.611-1.072 4.61-1.165 4.611-1.26 4.611-1.358 4.612-1.453 4.611-1.547 4.612-1.64 4.613-1.728 4.614-1.81 4.614-1.885 4.615-1.951 4.617-2.007 4.617-2.052 4.619-2.083 9.241-4.198 4.623-2.083 4.625-2.05 4.626-1.996 4.627-1.926 4.63-1.836 4.626-1.727 4.632-1.602 4.634-1.459 4.636-1.3 4.638-1.126 4.64-.94 4.64-.744 4.643-.537 4.643-.325z"/><path fill="#444876" d="m104.897 147.13v15.493h27.72v21.396h27.72v14.634h27.72v6.177h27.72v5.399a120.277 120.277 0 0 1 -133.81 28.893 120.284 120.284 0 0 1 -60.231-54.77v-14.434h27.72v-19.308h27.72v-3.48z"/><path fill="#fff" d="m105.843 146.184v15.493h27.72v21.395h27.72v14.635h27.72v6.177h27.72l.002 5.322c-.624.68-1.256 1.355-1.895 2.023l-.001-5.454h-25.826v25.883c-.628.37-1.26.734-1.894 1.092v-33.151l-25.826-.001v43.982c-.63.182-1.261.358-1.894.529v-59.145h-25.826v63.185c-.631.029-1.263.053-1.894.073v-84.653h-25.826v82.65c-.633-.118-1.264-.241-1.895-.37l.001-97.774h-25.827v1.59h.001v87.785c-.635-.289-1.266-.583-1.895-.883l.001-85.01h-25.827v17.414h.001l-.001 50.93a120.27 120.27 0 0 1 -1.893-1.631v-47.406h-25.827l-.001 15.236c-.65-1.179-1.282-2.37-1.893-3.571l.002-13.558h27.72v-19.306h27.72v-3.481z"/><circle cx="79.2" cy="79.2" r="57.9" fill="none" stroke="#444876" stroke-width="2"/></svg>',
+    plotly: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Plotly</title><path d="M1.713.002A1.713 1.713 0 0 0 0 1.715a1.713 1.713 0 0 0 1.713 1.713 1.713 1.713 0 0 0 1.714-1.713A1.713 1.713 0 0 0 1.713.002Zm6.861 0a1.713 1.713 0 0 0-1.713 1.713 1.713 1.713 0 0 0 1.713 1.713 1.713 1.713 0 0 0 1.713-1.713A1.713 1.713 0 0 0 8.574.002Zm6.857 0a1.713 1.713 0 0 0-1.714 1.713 1.713 1.713 0 0 0 1.714 1.713 1.713 1.713 0 0 0 1.713-1.713A1.713 1.713 0 0 0 15.431.002zm6.856 0a1.713 1.713 0 0 0-1.713 1.713 1.713 1.713 0 0 0 1.713 1.713A1.713 1.713 0 0 0 24 1.715 1.713 1.713 0 0 0 22.287.002ZM1.713 6.859A1.713 1.713 0 0 0 0 8.572a1.713 1.713 0 0 0 1.713 1.713 1.713 1.713 0 0 0 1.714-1.713A1.713 1.713 0 0 0 1.713 6.86Zm6.861 0c-.948 0-1.713.765-1.713 1.713v13.713c0 .947.765 1.713 1.713 1.713.948 0 1.713-.766 1.713-1.713V8.572c0-.948-.765-1.713-1.713-1.713zm6.857 0a1.713 1.713 0 0 0-1.714 1.713 1.713 1.713 0 0 0 1.714 1.713 1.713 1.713 0 0 0 1.713-1.713 1.713 1.713 0 0 0-1.713-1.713zm6.856 0c-.947 0-1.713.765-1.713 1.713v13.713c0 .947.766 1.713 1.713 1.713.948 0 1.713-.766 1.713-1.713V8.572c0-.948-.765-1.713-1.713-1.713zM1.713 13.715C.766 13.715 0 14.48 0 15.428v6.857c0 .947.766 1.713 1.713 1.713.948 0 1.714-.766 1.714-1.713v-6.857c0-.948-.766-1.713-1.714-1.713zm13.718 0c-.948 0-1.714.765-1.714 1.713v6.857c0 .947.766 1.713 1.714 1.713.947 0 1.713-.766 1.713-1.713v-6.857c0-.948-.766-1.713-1.713-1.713z"/></svg>',
+    flask: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Flask</title><path d="M10.773 2.878c-.013 1.434.322 4.624.445 5.734l-8.558 3.83c-.56-.959-.98-2.304-1.237-3.38l-.06.027c-.205.09-.406.053-.494-.088l-.011-.018-.82-1.506c-.058-.105-.05-.252.024-.392a.78.78 0 0 1 .358-.331l9.824-4.207c.146-.064.299-.063.4.004.106.062.127.128.13.327Zm.68 7c.523 1.97.675 2.412.832 2.818l-7.263 3.7a19.35 19.35 0 0 1-1.81-2.83l8.24-3.689Zm12.432 8.786h.003c.283.402-.047.657-.153.698l-.947.37c.037.125.035.319-.217.414l-.736.287c-.229.09-.398-.059-.42-.2l-.025-.125c-4.427 1.784-7.94 1.685-10.696.647-1.981-.745-3.576-1.983-4.846-3.379l6.948-3.54c.721 1.431 1.586 2.454 2.509 3.178 2.086 1.638 4.415 1.712 5.793 1.563l-.047-.233c-.015-.077.007-.135.086-.165l.734-.288a.302.302 0 0 1 .342.086l.748-.288a.306.306 0 0 1 .341.086l.583.89Z"/></svg>',
+    django: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Django</title><path d="M11.146 0h3.924v18.166c-2.013.382-3.491.535-5.096.535-4.791 0-7.288-2.166-7.288-6.32 0-4.002 2.65-6.6 6.753-6.6.637 0 1.121.05 1.707.203zm0 9.143a3.894 3.894 0 00-1.325-.204c-1.988 0-3.134 1.223-3.134 3.365 0 2.09 1.096 3.236 3.109 3.236.433 0 .79-.025 1.35-.102V9.142zM21.314 6.06v9.098c0 3.134-.229 4.638-.917 5.937-.637 1.249-1.478 2.039-3.211 2.905l-3.644-1.733c1.733-.815 2.574-1.53 3.109-2.625.561-1.121.739-2.421.739-5.835V6.059h3.924zM17.39.021h3.924v4.026H17.39z"/></svg>',
+    fastapi: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>FastAPI</title><path d="M12 .0387C5.3729.0384.0003 5.3931 0 11.9988c-.001 6.6066 5.372 11.9628 12 11.9625 6.628.0003 12.001-5.3559 12-11.9625-.0003-6.6057-5.3729-11.9604-12-11.96m-.829 5.4153h7.55l-7.5805 5.3284h5.1828L5.279 18.5436q2.9466-6.5444 5.892-13.0896"/></svg>',
+    os: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Python</title><path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></svg>',
+    subprocess: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Python</title><path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></svg>',
+    shutil: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Python</title><path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></svg>',
+    psutil: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Python</title><path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/></svg>',
+    apacheecharts: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Apache ECharts</title><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm-.792 5.307c2.192-.025 4.366 1.134 5.43 3.304.909 1.852.878 3.61-.098 5.645-.477.995-.487 1.06-.241 1.578.214.452.727.779 1.221.779.454 0 1.15-.586 1.252-1.054.1-.454-.193-1.118-.607-1.377a10.11 10.11 0 0 1-.393-.255c-.129-.1.42-.38.741-.38.687 0 1.247.526 1.375 1.29.055.333.134.422.44.502.859.222 1.297 1.451.755 2.116-.22.27-.23.271-.305.042-.267-.801-.666-1.12-1.403-1.12-.319 0-.572.128-1.098.556-1.006.82-1.866 1.303-2.907 1.632-1.276.384-2.752.478-4.086.156-2.162-.431-4.232-2.11-5.252-4.257C4.758 11.782 5.135 9 7.033 7.077a5.924 5.924 0 0 1 4.175-1.77Z"/></svg>',
+    folium: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Folium</title><path d="M9.209 17.302v.558h-.558v-.558h.558zm-1.116-.558v.558h.558v-.558h-.558zm1.116 1.116v.558h.558v-.558h-.558zm-1.674-1.674v.558h.558v-.558h-.558zm2.232 2.233v.558h.558v-.558h-.558zm.559-4.466v.558h.558v-.558h-.558zM9.767 2.791v.558h.558v-.558h-.558zm.559 5.581v.558h.558v-.558h-.558zm0 10.605v.558h.558v-.558h-.558zm-2.233-7.256v-.558h-.558v.558h.558zm1.116-4.465v-.558h-.558v.558h.558zm-.558-.558V6.14h-.558v.558h.558zm1.116 1.116v-.558h-.558v.558h.558zM8.093 6.14v-.559h-.558v.559h.558zm1.116 6.697v-.558h-.558v.558h.558zm1.117 1.116v-.558h-.559v.558h.559zm-1.675-1.674v-.558h-.558v.558h.558zm1.116 1.116v-.558h-.558v.558h.558zm.559-5.023v-.558h-.559v.558h.559zM6.977 18.977v.558h.558v-.558h-.558zm1.116-15.07h-.558v.558h.558v-.558zm0 16.186v.558h.558v-.558h-.558zm-.558-3.907v-.558h-.558v-4.465h.558v-.558h-.558V5.581h.558V4.465h-.558v.558h-.558v13.953h.558v-2.791h.558zm0 3.349v.558h.558v-.558h-.558zm1.116 1.116v.558h.558v-.558h-.558zm1.675 1.675v.558h.558v-.558h-.558zm-.559-.559v.558h.558v-.558h-.558zm-.558-.558v.558h.558v-.558h-.558zm1.117-19.535h-.559v.558h.558v-.558zm0 1.675v.558h.558v-.558h-.558zm-.559-1.116h-.558v.558h.558v-.558zm1.117-1.117h-.558v.558h.558v-.558zM9.209 2.791h-.558v.558h.558v-.558zm-.558.558h-.558v.558h.558v-.558zm5.023 15.628h.558v-.558h-.558v.558zm.559-16.186h-.558v.558h.558v-.558zm0 15.628h.558v-.559h-.558v.559zm-1.117 1.116h.558v-.558h-.558v.558zm2.233-7.256h-.558v.558h.558v-.558zm.558 4.465h.558v-.558h-.558v.558zm-1.116 1.116h.558v-.558h-.558v.558zm.558-.558h.558v-.558h-.558v.558zm-1.675-3.349h-.558v.558h.558v-.558zm.559-.558h-.558v.558h.558v-.558zm.558-6.139h-.558v.558h.558v-.558zm.558-.558h-.558v.558h.558v-.558zm.558-.558h-.558v.558h.558V6.14zm-2.233-2.791h-.558v.558h.558v-.558zm1.117 9.488h-.558v.558h.558v-.558zm1.116-1.116h-.558v.558h.558v-.558zm-1.674-3.907h-.558v.558h.558v-.558zm-.559.558h-.558v.558h.558v-.558zm-.558 14.512h.558v-.558h-.558v.558zm1.675-1.675h.558v-.558h-.558v.558zm-.558.558h.558v-.558h-.558v.558zm1.674-10.046h.558v-.558h-.558v.558zm-.558 8.93h.558v-.558h-.558v.558zm.558-.558h.558v-.558h-.558v.558zm1.116-15.07v-.558h-.558v1.116h.558v5.023h-.558v.558h.558v4.465h-.558v.558h.558v2.791h.558V5.023h-.558zm-.558 14.512h.558v-.558h-.558v.558zm-2.791 2.791h.558v-.558h-.558v.558zm2.791-17.861v-.558h-.558v.558h.558zm-.558-.558v-.558h-.558v.558h.558zm-.558-.558v-.558h-.558v.558h.558zm.558 2.791h.558v-.559h-.558v.559zm-2.233-4.466v-.558h-.558v.558h.558zm1.117 1.117v-.558h-.558v.558h.558zm-2.233 17.302h.558v-.558h-.558V15.07h.558v-.558h-.558V9.488h.558V8.93h-.558V4.465h.558v-.558h-.558V1.116h.558V.558h-.558V0h-1.116v.558h-.558v.558h.558v2.791h-.558v.558h.558V8.93h-.558v.558h.558v5.023h-.558v.558h.558v4.465h-.558v.558h.558v2.791h-.558v.558h.558V24h1.116v-.558h.558v-.558h-.558v-2.791zm1.675-17.86v-.559h-.558v.558h.558z"/></svg>',
+    chartdotjs: '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Chart.js</title><path d="M12 0L1.605 6v12L12 24l10.395-6V6zm0 1.41l9.172 5.295v10.59L12 22.59l-9.172-5.295V6.705zM5.902 8.334c-1.306 0-1.983.956-2.574 2.41v6.262L12 22.014l8.672-5.008v-5.971c-.447-.264-.894-.412-1.336-.412-4.275 0-3.97 4.885-6.717 5.8-2.748.917-3.511-8.089-6.717-8.089zm12.364.457c-2.9 0-2.137 4.732-5.342 4.732-1.63 0-2.52-1.317-3.477-1.981.148.326.3.655.442.98.467 1.068.922 2.09 1.379 2.734.228.322.455.541.644.644a.595.595 0 0 0 .549.05c.558-.187.968-.571 1.36-1.112.39-.541.74-1.228 1.154-1.916.413-.688.894-1.385 1.59-1.918.695-.534 1.607-.881 2.77-.881.465 0 .908.136 1.337.352v-.121c-.633-.849-1.348-1.563-2.406-1.563zm-6.68.152c-.868 0-1.491.82-2.076 2.06.094.055.192.106.277.167 1.06.761 1.798 1.853 3.137 1.853.678 0 1.067-.218 1.418-.585-.722-1.546-1.432-3.492-2.756-3.495Z"/></svg>',
+  };
+var LETTERS = {
+    os:        { t: "OS", bg: "#35557a", fg: "#fff" },
+    subprocess:{ t: "Sub", bg: "#5a6270", fg: "#fff" },
+    shutil:    { t: "Sh", bg: "#4b5563", fg: "#fff" },
+    psutil:    { t: "Ps", bg: "#166534", fg: "#fff" }
+  };
+
+  var I18N_UI = {"ru":{"nav.home":"🎓 Главная","nav.c1":"💻 Анализ данных","nav.c2":"📊 Визуализация","nav.c3":"💬 Веб-разработка","nav.c4":"🧠 ИИ и машинное обучение","nav.c5":"🗄️ Базы данных","nav.c6":"⚙️ Автоматизация","card.difficulty":"Сложность: ","card.plus":"Плюсы","card.minus":"Минусы","card.docs":"🔗 Документация","ui.theme":"Тема","ui.about":"📖 О продукте","brand.sub":"Каталог библиотек Python с примерами кода","page.1.h1":"💻 Анализ данных","page.1.desc":"Библиотеки для численных расчётов, обработки таблиц и машинного обучения — фундамент любого анализа данных.","page.2.h1":"📊 Визуализация данных","page.2.desc":"Постройте графики и интерактивные диаграммы за пару строк кода — от статичных графиков до веб-визуализации.","page.3.h1":"💬 Веб-разработка","page.3.desc":"Фреймворки для создания сайтов, API и серверных приложений — от микросервисов до полных решений.","page.4.h1":"🧠 ИИ и машинное обучение","page.4.desc":"Фреймворки для построения нейросетей, глубокого обучения и компьютерного зрения.","page.5.h1":"🗄️ Базы данных","page.5.desc":"Инструменты для подключения, запросов и хранения данных в популярных базах данных.","page.6.h1":"⚙️ Автоматизация","page.6.desc":"Инструменты для автоматизации процессов, очередей задач и управления инфраструктурой."},"en":{"nav.home":"🎓 Home","nav.c1":"💻 Data analysis","nav.c2":"📊 Visualisation","nav.c3":"💬 Web development","nav.c4":"🧠 AI & machine learning","nav.c5":"🗄️ Databases","nav.c6":"⚙️ Automation","card.difficulty":"Difficulty: ","card.plus":"Pros","card.minus":"Cons","card.docs":"🔗 Documentation","ui.theme":"Theme","ui.about":"📖 About","brand.sub":"A catalog of Python libraries with code examples","page.1.h1":"💻 Data analysis","page.1.desc":"Libraries for numeric computation, table processing and machine learning — the foundation of any data analysis.","page.2.h1":"📊 Data visualisation","page.2.desc":"Build charts and interactive diagrams in a few lines of code — from static plots to web visualisation.","page.3.h1":"💬 Web development","page.3.desc":"Frameworks for building sites, APIs and server applications — from microservices to full solutions.","page.4.h1":"🧠 AI & machine learning","page.4.desc":"Frameworks for building neural networks, deep learning and computer vision.","page.5.h1":"🗄️ Databases","page.5.desc":"Tools for connecting, querying and storing data in popular databases.","page.6.h1":"⚙️ Automation","page.6.desc":"Tools for automating processes, task queues and infrastructure management."}};
+  var LIB_EN = {"numpy":{"tag":"Arrays & computation","desc":"A library for working with multi-dimensional arrays and numeric data. It is the foundation of most data-analysis tools, scientific computing and machine learning in Python.","plus":["Very high operation speed","Core of the Python data ecosystem","Easy to start"],"minus":["Own data type — needs getting used to","Not suited for non-numeric tasks"]},"pandas":{"tag":"Tables & data","desc":"A library for processing and analysing structured tabular data. Its name comes from the word 'panel data'. It helps prepare and analyse data before using it in machine learning.","plus":["Convenient work with tables","Powerful filtering and grouping","Huge community"],"minus":["Can be slow on large data","High memory usage when copying"]},"scipy":{"tag":"Scientific computing","desc":"A platform for scientific and engineering computing. Extends NumPy with functionality for matrices, statistics, integrals and optimisation.","plus":["Wide range of scientific functions","Combines well with NumPy","Reliable, well-tested algorithms"],"minus":["Fairly high complexity","Specialised topics for beginners"]},"sklearn":{"tag":"Machine learning","desc":"An open-source machine-learning library. Created in 2007 as a Google Summer of Code project. Contains ready-made classification, regression and clustering algorithms.","plus":["One interface for all models","Many ready-made algorithms","Excellent documentation"],"minus":["Not for deep learning","Average performance on large data"]},"polars":{"tag":"Fast DataFrames","desc":"A high-performance library for working with tabular data. Uses parallel computing and processes DataFrames faster than Pandas.","plus":["Very fast processing of large data","Parallel computing","Lazy queries"],"minus":["Younger and fewer examples than Pandas","Fewer built-in functions"]},"geopandas":{"tag":"Geodata","desc":"An extension of Pandas for working with geodata. Adds support for geometric types and spatial operations over maps and coordinates.","plus":["Convenient geodata handling","Integration with Pandas","Maps and coordinate support"],"minus":["Needs extra dependencies installed","Specific to geo tasks"]},"matplotlib":{"tag":"2D/3D charts","desc":"A library for visualising data with 2D and 3D graphics. Creates various chart and diagram types and lets you combine them.","plus":["Huge control over the plot","Many chart types","Export to many formats"],"minus":["Lots of code for simple charts","Interface is partly dated"]},"seaborn":{"tag":"Statistical visualisation","desc":"A high-level visualisation library built on top of Matplotlib. Provides ready solutions for typical statistical-visualisation tasks.","plus":["Beautiful charts by default","Simple code for complex diagrams","Built on Matplotlib"],"minus":["Less control than Matplotlib","Depends on Pandas and Matplotlib"]},"plotly":{"tag":"Interactive charts","desc":"An open-source visualisation library that creates interactive charts. Widely used in data analysis, science, finance and web development.","plus":["Interactive charts by default","Beautiful modern graphics","Easy to embed on the web"],"minus":["Interactivity not always needed","Heavier than simple static charts"]},"apacheecharts":{"tag":"Web charts","desc":"An interactive data-visualisation library. Lets you build dozens of chart types for web pages with a rich set of options.","plus":["Many chart types","Interactivity by default","Good documentation"],"minus":["Web and JS oriented","Many options to learn"]},"folium":{"tag":"Maps & geodata","desc":"A library for creating interactive maps based on Leaflet. Lets you visualise geodata and build markers, polygons and heat maps.","plus":["Interactive maps easily","GeoPandas integration","Geodata visualisation"],"minus":["Maps only","Needs geodata to be useful"]},"chartdotjs":{"tag":"Web charts","desc":"A simple library for building charts in the browser. In a few lines it adds beautiful, interactive charts to your site.","plus":["Easy to use","Very lightweight","Great demos and examples"],"minus":["Limited to the web","Less flexible than powerful libraries"]},"flask":{"tag":"Microframework","desc":"A minimal web framework for building web apps in Python. Gives only the basics — ideal for small sites, APIs and microservices.","plus":["Simple and lightweight","Flexible composition","Fast start"],"minus":["No ready solution for many tasks","You choose components yourself"]},"django":{"tag":"Full framework","desc":"A high-level open-source framework for fast and secure server-side web development. Includes tools for typical tasks out of the box.","plus":["Batteries included (admin, DB, auth)","High security out of the box","Scalability"],"minus":["Hard to learn","Overkill for small projects"]},"fastapi":{"tag":"API","desc":"A modern web framework for creating APIs. Focused on high performance and simplicity. In a few lines it starts a server that accepts requests and returns results.","plus":["Very high speed","Automatic API documentation","Simple and modern"],"minus":["Younger and fewer examples than Django","Primarily API oriented"]},"jinja":{"tag":"Templating","desc":"A powerful template engine for Python. Used to generate HTML, text and code, complementing web frameworks with a ready template syntax.","plus":["Flexible templates with logic","Flask and Django integration","Easy to learn"],"minus":["Templates only, not a framework","Own syntax to learn"]},"gunicorn":{"tag":"WSGI server","desc":"A production WSGI server for running Python apps. Serves Flask, Django and FastAPI applications on real servers.","plus":["Fast and reliable","Many worker support","Production standard"],"minus":["Unix/Linux only","Needs load tuning"]},"pydantic":{"tag":"Data validation","desc":"A library for validating and processing data with Python types. Widely used in FastAPI to describe request and response schemas.","plus":["Automatic type validation","FastAPI integration","Readable models"],"minus":["Overhead on large volumes","Speed depends on version"]},"tensorflow":{"tag":"Deep learning","desc":"An open-source framework for machine and deep learning. Builds and trains neural networks of any complexity — from simple models to production systems.","plus":["Powerful toolkit for neural nets","Scales to production","Huge community"],"minus":["Hard to learn","Overkill for simple tasks"]},"pytorch":{"tag":"Neural networks","desc":"A deep-learning framework with a dynamic computation graph. Widely used in research thanks to its flexibility and simple debugging.","plus":["Flexibility and dynamic graph","Simple debugging","Research standard"],"minus":["Steep learning curve","Lots of low-level code"]},"keras":{"tag":"High-level networks","desc":"A high-level API for building neural networks. Works on top of TensorFlow and assembles models from ready layers in a few lines.","plus":["Simple high-level API","Quick start","TensorFlow integration"],"minus":["Hides low-level logic","Less control over training"]},"opencv":{"tag":"Computer vision","desc":"A library for computer vision and image processing. Includes hundreds of algorithms for detecting, recognising and transforming images and video.","plus":["Huge set of algorithms","Real-time video processing","Cross-platform"],"minus":["Complex documentation","Needs image-processing knowledge"]},"huggingface":{"tag":"Transformers","desc":"An ecosystem for working with pretrained machine-learning models. Gives access to thousands of ready models, including large language models and transformers.","plus":["Thousands of ready models","Simple transformers API","Cross-platform"],"minus":["Needs powerful hardware for big models","Many concepts for beginners"]},"jupyter":{"tag":"Interactive notebooks","desc":"An interactive environment for running Python code in notebooks. Combines code, visualisations and text, which is handy for research and ML experiments.","plus":["Interactive code execution","Visualisations right in the notebook","Great for ML experiments"],"minus":["Not for production","Can be slow for big code"]},"sqlite":{"tag":"Embedded DBMS","desc":"An embedded relational DBMS with no separate server. Stores the database in one file and is widely used in Python through the standard sqlite3 module.","plus":["No server or install needed","Storage in one file","Built into Python"],"minus":["Limited for heavy loads","No role model"]},"postgresql":{"tag":"Relational DB","desc":"A powerful open-source relational database. Supports complex queries, transactions, JSON and extensibility for advanced applications.","plus":["Reliability and transactions","Extensibility and data types","Production standard"],"minus":["Requires server setup","Resource-hungry for simple tasks"]},"mongodb":{"tag":"Document DB","desc":"A document-oriented database that stores data in JSON-like documents. Useful for flexible schemas and fast development.","plus":["Flexible data schema","Easy scaling","Fast development"],"minus":["Fewer integrity guarantees","Requires a server"]},"redis":{"tag":"Cache & key-value store","desc":"A high-performance in-memory data-structure store. Used for caching, queues and sessions thanks to ultra-fast access.","plus":["Very high speed","In-memory storage","Many data types"],"minus":["Data in RAM","Limited capacity"]},"mysql":{"tag":"Relational DB","desc":"A popular open-source relational database. A reliable solution for web apps and corporate systems thanks to its maturity and ecosystem.","plus":["Popularity and maturity","Good documentation","Many CMS supported"],"minus":["Less flexible than PostgreSQL","Needs setup"]},"sqlalchemy":{"tag":"ORM","desc":"A library for working with databases through object-relational mapping. Writes queries in Python instead of SQL and supports many DBMS.","plus":["Abstraction over SQL","Many DBMS supported","ORM and Core flexibility"],"minus":["Steep learning curve","ORM magic can confuse"]},"apacheairflow":{"tag":"Pipeline orchestration","desc":"A platform for programmatically orchestrating workflows. Describes pipelines in Python, schedules them and tracks execution.","plus":["Flexible pipeline description","Clear web interface","Task scheduler"],"minus":["Needs setup and resources","Steep learning curve"]},"celery":{"tag":"Task queues","desc":"A distributed task queue for Python. Runs long operations asynchronously, in the background, in parallel on several workers.","plus":["Async task execution","Worker scaling","Broker integration"],"minus":["Needs a message broker","Debugging distributed tasks"]},"grafana":{"tag":"Monitoring & dashboards","desc":"A platform for analytics and metric visualisation. Builds interactive dashboards and alerts from many data sources.","plus":["Beautiful interactive dashboards","Many data sources","Alerts"],"minus":["Not a Python library itself","Needs source setup"]},"ansible":{"tag":"IT-automation","desc":"A tool for automating configuration and deployment. Manages servers and apps on dozens of machines through simple YAML playbooks.","plus":["Simple YAML syntax","Agentless on hosts","Huge module collection"],"minus":["Not a pure Python API","Hard for very large infrastructures"]},"docker":{"tag":"Containerisation","desc":"A platform for packaging applications into containers. Runs Python projects in an isolated and portable environment.","plus":["Application portability","Environment isolation","Simplifies deployment"],"minus":["Extra abstraction level","Daemon resources"]},"kubernetes":{"tag":"Container orchestration","desc":"A container-orchestration system. Automates deployment, scaling and management of containerised applications on a cluster.","plus":["Automatic scaling","Fault tolerance","Cloud infrastructure standard"],"minus":["High complexity","Needs a cluster and resources"]}};
+
+  function cardHTML(lib) {
+    var tag = CUR_LANG === "en" && LIB_EN[lib.key] ? LIB_EN[lib.key].tag : lib.tag;
+    var desc = CUR_LANG === "en" && LIB_EN[lib.key] ? LIB_EN[lib.key].desc : lib.desc;
+    var plus = CUR_LANG === "en" && LIB_EN[lib.key] ? LIB_EN[lib.key].plus : lib.plus;
+    var minus = CUR_LANG === "en" && LIB_EN[lib.key] ? LIB_EN[lib.key].minus : lib.minus;
+    var diffLabel = t("card.difficulty");
+    var plusLabel = t("card.plus");
+    var minusLabel = t("card.minus");
+    var docsLabel = t("card.docs");
+    if (LETTERS[lib.key]) {
+      var L = LETTERS[lib.key];
+      return '' +
+        '<article class="card" id="' + lib.key + '" data-key="' + lib.key + '" data-name="' + esc(lib.name) + '" data-desc="' + esc(desc) + '">' +
+          '<div class="lib-head">' +
+            '<span class="lib-logo" style="background:' + L.bg + ';color:' + L.fg + ';font-weight:800;font-size:16px;">' + L.t + '</span>' +
+            '<div class="lib-head-inner">' +
+              '<h3>' + esc(lib.name) + '</h3>' +
+              '<span class="tag">' + esc(tag) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<p class="desc">' + esc(desc) + '</p>' +
+          '<p class="difficulty">' + diffLabel + diffStars(lib.diff) + '</p>' +
+          '<div class="pluses"><span class="title">' + plusLabel + '</span>' + listHTML(plus, "pluses") + '</div>' +
+          '<div class="minuses"><span class="title">' + minusLabel + '</span>' + listHTML(minus, "minuses") + '</div>' +
+          '<a class="docs" href="' + esc(lib.docs) + '" target="_blank" rel="noopener">' + docsLabel + '</a>' +
+        '</article>';
+    }
+    var logo = LOGOS[lib.key] || '';
+    return '' +
+      '<article class="card" id="' + lib.key + '" data-key="' + lib.key + '" data-name="' + esc(lib.name) + '" data-desc="' + esc(desc) + '">' +
+        '<div class="lib-head">' +
+          '<span class="lib-logo">' + logo + '</span>' +
+          '<div class="lib-head-inner">' +
+            '<h3>' + esc(lib.name) + '</h3>' +
+            '<span class="tag">' + esc(tag) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<p class="desc">' + esc(desc) + '</p>' +
+        '<p class="difficulty">' + diffLabel + diffStars(lib.diff) + '</p>' +
+        '<div class="pluses"><span class="title">' + plusLabel + '</span>' + listHTML(plus, "pluses") + '</div>' +
+        '<div class="minuses"><span class="title">' + minusLabel + '</span>' + listHTML(minus, "minuses") + '</div>' +
+        '<a class="docs" href="' + esc(lib.docs) + '" target="_blank" rel="noopener">' + docsLabel + '</a>' +
+      '</article>';
+  }
+  var CAT = "cat-2";
+  var CUR_LANG = "ru";
+  try { CUR_LANG = localStorage.getItem("lang") || "ru"; } catch (e) {}
+  if (CUR_LANG !== "en") CUR_LANG = "ru";
+
+  function t(key) {
+    var d = I18N_UI[CUR_LANG] || I18N_UI.ru;
+    return (key in d) ? d[key] : key;
+  }
+  function renderAll() {
+    var els = document.querySelectorAll("[data-i18n]");
+    els.forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      var v = t(key);
+      if (v) el.textContent = v;
+    });
+    if (catGrid && catGrid.parentNode) catGrid.innerHTML = "";
+    libraryData.forEach(function (lib) {
+      if (lib.cat === CAT && catGrid) catGrid.insertAdjacentHTML("beforeend", cardHTML(lib));
+    });
+    if (themeBtn) syncTheme();
+  }
+  var catGrid = document.querySelector('.grid[data-grid="' + CAT + '"]');
+  var themeBtn = document.getElementById("theme-toggle");
+  var root = document.documentElement;
+  var storedTheme = "";
+  try { storedTheme = localStorage.getItem("theme") || ""; } catch (e) {}
+  if (storedTheme === "light") root.setAttribute("data-theme", "light");
+  function syncTheme() {
+    themeBtn.innerHTML = root.getAttribute("data-theme") === "light" ? '&#9789; ' + t("ui.theme") : '&#9728; ' + t("ui.theme");
+  }
+  syncTheme();
+  themeBtn.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "" : "light";
+    if (next === "light") root.setAttribute("data-theme", "light");
+    else root.removeAttribute("data-theme");
+try { localStorage.setItem("theme", next); } catch (e) {}
+    syncTheme();
+  });
+
+  var langBtn = document.getElementById("lang-btn");
+  var langMenu = document.getElementById("lang-menu");
+  var langLabel = document.getElementById("lang-label");
+  if (langBtn && langMenu) {
+    var LANGS = [{ code: "ru", label: "Русский" }, { code: "en", label: "English" }];
+    langMenu.innerHTML = LANGS.map(function (l) {
+      return '<button type="button" data-lang="' + l.code + '">' + l.label + '</button>';
+    }).join("");
+    langBtn.addEventListener("click", function () { langMenu.classList.toggle("open"); });
+    langMenu.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-lang]");
+      if (!b) return;
+      var lang = b.getAttribute("data-lang");
+      if (lang !== "en") lang = "ru";
+      CUR_LANG = lang;
+      document.documentElement.setAttribute("lang", lang);
+      var found = null;
+      for (var i = 0; i < LANGS.length; i++) if (LANGS[i].code === lang) { found = LANGS[i]; break; }
+      if (found) langLabel.textContent = "\u{1F4AC} " + found.label;
+      try { localStorage.setItem("lang", lang); } catch (err) {}
+      langMenu.classList.remove("open");
+      renderAll();
+    });
+  }
+  renderAll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>О продукте — LibraryFinder</title>
+<meta name="description" content="О продукте LibraryFinder — гид по популярным библиотекам Python с официальными иконками, поиском и категориями.">
+<style>
+  :root {
+    --bg: #0f141c;
+    --surface: #1a2230;
+    --ink: #e8eef5;
+    --ink-soft: #9aa7b8;
+    --brand: #5b9bd5;
+    --brand-2: #ffd43b;
+    --brand-dark: #8ab8e2;
+    --line: #2a3442;
+    --header-grad: linear-gradient(135deg, #14293f 0%, #1e3a57 55%, #214767 100%);
+    --header-text: #fff;
+    --header-soft: #bfd5ea;
+    --nav-link-bg: rgba(255,255,255,.10);
+    --nav-link-hover: rgba(255,255,255,.22);
+    --chip-active-text: #0f141c;
+    --radius: 14px;
+    --shadow: 0 8px 28px rgba(0,0,0,.35);
+  }
+  html[data-theme="light"] {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --ink: #1f2430;
+    --ink-soft: #5a6474;
+    --brand: #3776ab;
+    --brand-2: #e3a008;
+    --brand-dark: #2a5c8a;
+    --line: #e3e8ef;
+    --header-grad: linear-gradient(135deg, #2b6ca3 0%, #3776ab 55%, #3b82b5 100%);
+    --header-text: #fff;
+    --header-soft: #d9e8f5;
+    --nav-link-bg: rgba(255,255,255,.14);
+    --nav-link-hover: rgba(255,255,255,.30);
+    --chip-active-text: #ffffff;
+    --shadow: 0 8px 28px rgba(31,36,48,.08);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; background: var(--bg); height: 100%; }
+  body {
+    margin: 0; min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.6; overflow-x: hidden;
+  }
+  a { color: var(--brand-dark); }
+
+header.top {
+    background: var(--header-grad);
+    color: var(--header-text);
+    padding: 16px 20px 12px;
+    border-radius: 24px;
+    margin: 12px;
+  }
+  .brand-row { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 44px; height: 44px; border-radius: 12px;
+    overflow: hidden; display: grid; place-items: center;
+  }
+  .logo svg { width: 100%; height: 100%; display: block; }
+  .logo .boot { fill: var(--brand); }
+  .logo .book2 { fill: var(--brand); }
+  .logo .mglass { stroke: var(--brand); }
+  .logo .mark { fill: var(--brand-2); }
+  html[data-theme="light"] .logo .boot { fill: var(--brand-dark); }
+  html[data-theme="light"] .logo .book2 { fill: var(--brand-dark); }
+  html[data-theme="light"] .logo .mglass { stroke: var(--brand-dark); }
+  .brand-title { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: .2px; }
+  .brand-sub { color: var(--header-soft); margin: 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 620px; }
+  .brand-left { display: flex; align-items: center; gap: 12px; }
+  nav.main { max-width: 1080px; margin: 12px auto 0; display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  nav.main a {
+    color: var(--header-text); text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 6px 12px; border-radius: 999px; background: var(--nav-link-bg);
+    transition: background .15s; white-space: nowrap;
+  }
+  nav.main a:hover { background: var(--nav-link-hover); }
+
+
+  nav.main a[aria-current="page"] { outline: 2px solid var(--brand-2); outline-offset: -1px; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 34px 20px 60px; }
+  .about h1 { font-size: 30px; margin: 0 0 10px; letter-spacing: -.5px; }
+  .about .lead { color: var(--ink-soft); font-size: 17px; margin: 0 0 24px; }
+  .about h2 { font-size: 21px; margin: 30px 0 8px; }
+  .about p, .about li { color: var(--ink-soft); font-size: 15px; }
+  .about ul { padding-left: 20px; }
+  .about ul li { margin: 5px 0; }
+  .about code {
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink);
+    padding: 2px 6px; border-radius: 6px; font-size: 14px;
+  }
+  .about pre {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; overflow-x: auto; color: var(--ink); font-size: 14px; line-height: 1.5;
+  }
+  .about .info-block { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin: 12px 0; }
+  .about .info-block h3 { margin: 0 0 8px; font-size: 17px; color: var(--ink); }
+  .about .info-block p { margin: 0; }
+  .about .back { display: inline-block; margin-top: 26px; color: var(--brand-dark); font-weight: 700; text-decoration: none; border: 1px solid var(--brand); border-radius: 10px; padding: 10px 16px; }
+  .about .back:hover { background: rgba(91,155,213,.15); }
+
+  footer { border-top: 1px solid var(--line); background: var(--surface); padding: 20px; text-align: center; color: var(--ink-soft); font-size: 13px; }
+  footer .footer-links { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+  footer .fbtn { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: border-color .15s; }
+  footer .fbtn:hover { border-color: var(--brand); color: var(--brand-dark); }
+  footer .fbtn-link { text-decoration: none; }
+  footer .fbtn .lang-label { color: var(--brand-dark); font-weight: 700; }
+  .lang-menu { display: none; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; margin: 10px auto 0; max-width: 420px; }
+  .lang-menu.open { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+  .lang-menu button { background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; }
+  .lang-menu button:hover { border-color: var(--brand); }
+  footer .ftext { margin-top: 12px; }
+
+  @media (max-width: 640px) {
+    .brand-title { font-size: 18px; }
+    .about h1 { font-size: 26px; }
+  }
+
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    margin: 0 0 12px;
+    border-radius: 0 0 24px 24px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand-row">
+      <div class="brand-left">
+        <div class="logo">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LibraryFinder">
+            <path class="boot" d="M12 44h30v5a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" opacity=".9"/>
+            <rect class="book2" x="16" y="30" width="24" height="16" rx="2" opacity=".55"/>
+            <rect x="18" y="26" width="20" height="16" rx="2" opacity=".3"/>
+            <circle class="mglass" cx="42" cy="22" r="12" fill="none" stroke-width="5"/>
+            <line class="mglass" x1="50" y1="32" x2="60" y2="42" stroke-width="6" stroke-linecap="round"/>
+            <circle class="mark" cx="42" cy="22" r="3.5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">LibraryFinder</h1>
+          <p class="brand-sub" data-i18n="brand.sub">Каталог библиотек Python с примерами кода</p>
+        </div>
+      </div>
+    </div>
+    <nav class="main" aria-label="Разделы">
+      <a href="index.html" data-i18n="nav.home">🎓 Главная</a>
+      <a href="category-1.html" data-i18n="nav.c1">💻 Анализ данных</a>
+      <a href="category-2.html" data-i18n="nav.c2">📊 Визуализация</a>
+      <a href="category-3.html" data-i18n="nav.c3">💬 Веб-разработка</a>
+      <a href="category-4.html" data-i18n="nav.c4">🧠 ИИ и машинное обучение</a>
+      <a href="category-5.html" data-i18n="nav.c5">🗄️ Базы данных</a>
+      <a href="category-6.html" data-i18n="nav.c6">⚙️ Автоматизация</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="about">
+    <h1 data-i18n="about.title">📖 О продукте</h1>
+    <p class="lead" data-i18n="about.lead">LibraryFinder — интерактивный гид по популярным библиотекам Python.</p>
+
+    <h2 data-i18n="about.what">Что это</h2>
+    <p data-i18n="about.whatText">Проект помогает быстро находить подходящую библиотеку для решения задачи. Всё собрано в одном месте: от численных расчётов и визуализации до веб-разработки, ИИ, баз данных и автоматизации.</p>
+
+    <h2 data-i18n="about.install">Установка библиотек</h2>
+    <p data-i18n="about.installLead">Почти все библиотеки Python устанавливаются через pip — менеджер пакетов Python. Установка обычно занимает одну команду в терминале и не требует других настроек.</p>
+    <div class="info-block">
+      <h3 data-i18n="about.installPip">Базовый pip</h3>
+      <p data-i18n="about.installPipText">Установите библиотеку командой:</p>
+      <pre>pip install имя-библиотеки</pre>
+    </div>
+    <div class="info-block">
+      <h3 data-i18n="about.installVenv">Виртуальное окружение</h3>
+      <p data-i18n="about.installVenvText">Рекомендуется ставить библиотеки в виртуальное окружение, чтобы изолировать зависимости проекта. Создаётся командой:</p>
+      <pre>python -m venv .venv</pre>
+    </div>
+    <div class="info-block">
+      <h3 data-i18n="about.installReq">Файл requirements.txt</h3>
+      <p data-i18n="about.installReqText">Для воспроизводимости проекта список библиотек сохраняют в файле requirements.txt и устанавливают разом:</p>
+      <pre>pip install -r requirements.txt</pre>
+    </div>
+    <p data-i18n="about.installNote">Встроенные модули (например, os, sqlite3) устанавливать не нужно — они уже входят в Python. Конкретные команды установки для каждой библиотеки приведены в официальной документации.</p>
+
+    <h2 data-i18n="about.cats">Категории</h2>
+    <p data-i18n="about.catsText">В каталоге собрано более 40 библиотек Python — от классических NumPy, Pandas и Flask до современных Polars, Hugging Face и Kubernetes.</p>
+
+    <a class="back" href="index.html" data-i18n="about.back">← Вернуться на главную</a>
+  </section>
+</main>
+
+<footer id="footer">
+  <div class="footer-links">
+    <button class="fbtn" id="theme-toggle" data-i18n="ui.theme" aria-label="Переключить тему">☀ Тема</button>
+    <a class="fbtn fbtn-link" href="about.html" data-i18n="ui.about">📖 О продукте</a>
+    <button class="fbtn" id="lang-btn" aria-label="Выбрать язык"><span class="lang-label" id="lang-label">&#128172; Русский</span></button>
+  </div>
+  <div class="lang-menu" id="lang-menu"></div>
+  <p class="ftext">LibraryFinder &middot; 2026</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var I18N_UI = {
+    ru: {
+      "nav.home": "🎓 Главная", "nav.c1": "💻 Анализ данных", "nav.c2": "📊 Визуализация",
+      "nav.c3": "💬 Веб-разработка", "nav.c4": "🧠 ИИ и машинное обучение", "nav.c5": "🗄️ Базы данных", "nav.c6": "⚙️ Автоматизация",
+      "brand.sub": "Каталог библиотек Python с примерами кода",
+      "ui.theme": "Тема", "ui.about": "📖 О продукте",
+      "about.title": "📖 О продукте",
+      "about.lead": "LibraryFinder — интерактивный гид по популярным библиотекам Python.",
+      "about.what": "Что это",
+      "about.whatText": "Проект помогает быстро находить подходящую библиотеку для решения задачи. Всё собрано в одном месте: от численных расчётов и визуализации до веб-разработки, ИИ, баз данных и автоматизации.",
+      "about.install": "Установка библиотек",
+      "about.installLead": "Почти все библиотеки Python устанавливаются через pip — менеджер пакетов Python. Установка обычно занимает одну команду в терминале и не требует других настроек.",
+      "about.installPip": "Базовый pip",
+      "about.installPipText": "Установите библиотеку командой:",
+      "about.installVenv": "Виртуальное окружение",
+      "about.installVenvText": "Рекомендуется ставить библиотеки в виртуальное окружение, чтобы изолировать зависимости проекта. Создаётся командой:",
+      "about.installReq": "Файл requirements.txt",
+      "about.installReqText": "Для воспроизводимости проекта список библиотек сохраняют в файле requirements.txt и устанавливают разом:",
+      "about.installNote": "Встроенные модули (например, os, sqlite3) устанавливать не нужно — они уже входят в Python. Конкретные команды установки для каждой библиотеки приведены в официальной документации.",
+      "about.cats": "Категории",
+      "about.catsText": "В каталоге собрано более 40 библиотек Python — от классических NumPy, Pandas и Flask до современных Polars, Hugging Face и Kubernetes.",
+      "about.back": "← Вернуться на главную"
+    },
+    en: {
+      "nav.home": "🎓 Home", "nav.c1": "💻 Data analysis", "nav.c2": "📊 Visualisation",
+      "nav.c3": "💬 Web development", "nav.c4": "🧠 AI & machine learning", "nav.c5": "🗄️ Databases", "nav.c6": "⚙️ Automation",
+      "brand.sub": "A catalog of Python libraries with code examples",
+      "ui.theme": "Theme", "ui.about": "📖 About",
+      "about.title": "📖 About",
+      "about.lead": "LibraryFinder — an interactive guide to popular Python libraries.",
+      "about.what": "What it is",
+      "about.whatText": "The project helps you quickly find the right library for your task. Everything is in one place: from numeric computation and visualisation to web development, AI, databases and automation.",
+      "about.install": "Installing libraries",
+      "about.installLead": "Almost all Python libraries are installed with pip, the Python package manager. Installation usually takes a single command in the terminal and needs no other setup.",
+      "about.installPip": "Basic pip",
+      "about.installPipText": "Install a library with the command:",
+      "about.installVenv": "Virtual environment",
+      "about.installVenvText": "It is recommended to install libraries into a virtual environment to isolate project dependencies. Create one with:",
+      "about.installReq": "requirements.txt file",
+      "about.installReqText": "For reproducibility, save the list of libraries in a requirements.txt file and install them all at once:",
+      "about.installNote": "Built-in modules (for example os, sqlite3) do not need installation — they already come with Python. Specific install commands for each library are given in the official documentation.",
+      "about.cats": "Categories",
+      "about.catsText": "The catalog has more than 40 Python libraries — from classics like NumPy, Pandas and Flask to modern Polars, Hugging Face and Kubernetes.",
+      "about.back": "← Back to home"
+    }
+  };
+
+  var themeBtn = document.getElementById("theme-toggle");
+  var root = document.documentElement;
+  var CUR_LANG = "ru";
+  try { CUR_LANG = localStorage.getItem("lang") || "ru"; } catch (e) {}
+  if (CUR_LANG !== "en") CUR_LANG = "ru";
+
+  function t(key) {
+    var d = I18N_UI[CUR_LANG] || I18N_UI.ru;
+    return (key in d) ? d[key] : key;
+  }
+  function renderAll() {
+    var els = document.querySelectorAll("[data-i18n]");
+    els.forEach(function (el) {
+      var key = el.getAttribute("data-i18n");
+      var v = t(key);
+      if (v) el.textContent = v;
+    });
+    syncTheme();
+    langLabel.textContent = "\u{1F4AC} " + (CUR_LANG === "en" ? "English" : "Русский");
+  }
+
+  var storedTheme = "";
+  try { storedTheme = localStorage.getItem("theme") || ""; } catch (e) {}
+  if (storedTheme === "light") root.setAttribute("data-theme", "light");
+  function syncTheme() {
+    themeBtn.innerHTML = root.getAttribute("data-theme") === "light"
+      ? '\u{1F319} ' + t("ui.theme") : '\u{2600} ' + t("ui.theme");
+  }
+  syncTheme();
+  themeBtn.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "" : "light";
+    if (next === "light") root.setAttribute("data-theme", "light");
+    else root.removeAttribute("data-theme");
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    syncTheme();
+  });
+
+  var langBtn = document.getElementById("lang-btn");
+  var langMenu = document.getElementById("lang-menu");
+  var langLabel = document.getElementById("lang-label");
+  if (langBtn && langMenu) {
+    var LANGS = [{ code: "ru", label: "Русский" }, { code: "en", label: "English" }];
+    langMenu.innerHTML = LANGS.map(function (l) {
+      return '<button type="button" data-lang="' + l.code + '">' + l.label + '</button>';
+    }).join("");
+    langBtn.addEventListener("click", function () { langMenu.classList.toggle("open"); });
+    langMenu.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-lang]");
+      if (!b) return;
+      var lang = b.getAttribute("data-lang");
+      if (lang !== "en") lang = "ru";
+      CUR_LANG = lang;
+      root.setAttribute("lang", lang);
+      try { localStorage.setItem("lang", lang); } catch (err) {}
+      langMenu.classList.remove("open");
+      renderAll();
+    });
+  }
+  renderAll();
+})();
+</script>
+</body>
+</html>
